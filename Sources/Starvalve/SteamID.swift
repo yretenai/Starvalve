@@ -12,17 +12,17 @@ public struct SteamID {
 	public var steam3: String {
 		let letter =
 			switch type {
-			case .invalid: "I"
-			case .profile: "U"
-			case .multiseat: "M"
-			case .gameServer: "G"
-			case .anonymousGameServer: "A"
-			case .pending: "P"
-			case .contentServer: "C"
-			case .group: "g"
-			case .chat: "c"
-			case .peer: "p"
-			case .anonymousUser: "a"
+				case .invalid: "I"
+				case .profile: "U"
+				case .multiseat: "M"
+				case .gameServer: "G"
+				case .anonymousGameServer: "A"
+				case .pending: "P"
+				case .contentServer: "C"
+				case .group: "g"
+				case .chat: "c"
+				case .peer: "p"
+				case .anonymousUser: "a"
 			}
 
 		return "[\(letter):\(universe.rawValue):\(accountID)]"

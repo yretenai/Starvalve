@@ -119,36 +119,36 @@ public struct TextVDF {
 
 		while let token = try lexer.next() {
 			switch token {
-			case .closeDict:
-				guard let last = memo.popLast() else {
-					return current
-				}
-
-				current = last
-			case .openDict:
-				guard let currentKey = key else {
-					throw TextVDFError.missingKey
-				}
-
-				let next = ValveKeyValue(currentKey)
-				if let current: ValveKeyValue = current {
-					current.append(next)
-					memo.append(current)
-				}
-
-				current = next
-				key = nil
-			case .string(let value):
-				if let currentKey: ValveKeyValueNode = key {
-					guard let current = current else {
-						throw TextVDFError.insertingIntoRootValue
+				case .closeDict:
+					guard let last = memo.popLast() else {
+						return current
 					}
 
-					current[currentKey] = ValveKeyValueNode(value)
+					current = last
+				case .openDict:
+					guard let currentKey = key else {
+						throw TextVDFError.missingKey
+					}
+
+					let next = ValveKeyValue(currentKey)
+					if let current: ValveKeyValue = current {
+						current.append(next)
+						memo.append(current)
+					}
+
+					current = next
 					key = nil
-				} else {
-					key = ValveKeyValueNode(value)
-				}
+				case .string(let value):
+					if let currentKey: ValveKeyValueNode = key {
+						guard let current = current else {
+							throw TextVDFError.insertingIntoRootValue
+						}
+
+						current[currentKey] = ValveKeyValueNode(value)
+						key = nil
+					} else {
+						key = ValveKeyValueNode(value)
+					}
 			}
 		}
 

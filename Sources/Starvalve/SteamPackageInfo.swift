@@ -36,7 +36,7 @@ public struct SteamPackageInfo {
 
 	public init(version: Int, data: Data) throws {
 		let cursor = DataCursor(data)
-		let version = try data.read(as: UInt32.self)
+		let version = try cursor.read(as: UInt32.self)
 		guard (version & 0xFFFFFF) == 0x75644 else {
 			throw SteamAppInfoError.unsupported
 		}
