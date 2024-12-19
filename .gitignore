@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2024 Nobody
+# SPDX-License-Identifier: CC0-1.0
+
+.DS_Store
+/.build
+/.index-build
+/Packages
+xcuserdata/
+DerivedData/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+Package.resolved

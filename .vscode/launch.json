@@ -1,0 +1,22 @@
+{
+	"configurations": [
+		{
+			"type": "swift-lldb",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:Starvalve}",
+			"name": "Debug StarvalveControl",
+			"program": "${workspaceFolder:Starvalve}/.build/debug/StarvalveControl",
+			"preLaunchTask": "swift: Build Debug StarvalveControl"
+		},
+		{
+			"type": "swift-lldb",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:Starvalve}",
+			"name": "Release StarvalveControl",
+			"program": "${workspaceFolder:Starvalve}/.build/release/StarvalveControl",
+			"preLaunchTask": "swift: Build Release StarvalveControl"
+		}
+	]
+}

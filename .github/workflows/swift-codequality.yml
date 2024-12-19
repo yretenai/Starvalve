@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2024 Nobody
+# SPDX-License-Identifier: CC0-1.0
+
+name: "[Swift] Code Quality"
+
+on: [push]
+
+jobs:
+  swift-cq:
+    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        swift: ["6.0.2"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: yretenai/setup-swift@edge
+        with:
+          swift-version: ${{ matrix.swift }}
+      - uses: actions/checkout@v4
+      - name: Lint
+        run: swift format lint --configuration swift-format.json --strict --recursive .
