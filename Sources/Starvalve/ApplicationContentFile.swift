@@ -76,7 +76,7 @@ public struct ACFInstalledApplicationDepot {
 	}
 
 	public func vdf(_ depotId: UInt) -> ValveKeyValue {
-		var vdf = ValveKeyValue(ValveKeyValueNode(unsigned: depotId))
+		let vdf = ValveKeyValue(ValveKeyValueNode(unsigned: depotId))
 		vdf[ValveKeyValueNode("manifest")] = ValveKeyValueNode(unsigned: manifest)
 		vdf[ValveKeyValueNode("size")] = ValveKeyValueNode(unsigned: size)
 		return vdf
@@ -205,7 +205,7 @@ public struct ApplicationContentFile {
 	}
 
 	public func vdf() -> ValveKeyValue {
-		var vdf = ValveKeyValue(ValveKeyValueNode("AppState"))
+		let vdf = ValveKeyValue(ValveKeyValueNode("AppState"))
 
 		vdf[ValveKeyValueNode("appid")] = ValveKeyValueNode(unsigned: appId)
 		vdf[ValveKeyValueNode("universe")] = ValveKeyValueNode(signed: universe.rawValue)
@@ -232,14 +232,14 @@ public struct ApplicationContentFile {
 			vdf[ValveKeyValueNode("StagingFolder")] = ValveKeyValueNode(signed: stagingFolder)
 		}
 
-		var installedDepots = ValveKeyValue(ValveKeyValueNode("InstalledDepots"))
+		let installedDepots = ValveKeyValue(ValveKeyValueNode("InstalledDepots"))
 		for (depotId, installedDepot) in self.installedDepots {
 			installedDepots.append(installedDepot.vdf(depotId))
 		}
 		vdf.append(installedDepots)
 
 		if !self.installScripts.isEmpty {
-			var installScripts = ValveKeyValue(ValveKeyValueNode("InstallScripts"))
+			let installScripts = ValveKeyValue(ValveKeyValueNode("InstallScripts"))
 			for (appId, installScript) in self.installScripts {
 				installScripts[ValveKeyValueNode(unsigned: appId)] = ValveKeyValueNode(installScript)
 			}
@@ -247,20 +247,20 @@ public struct ApplicationContentFile {
 		}
 
 		if !self.sharedDepots.isEmpty {
-			var sharedDepots = ValveKeyValue(ValveKeyValueNode("SharedDepots"))
+			let sharedDepots = ValveKeyValue(ValveKeyValueNode("SharedDepots"))
 			for (depotId, appId) in self.sharedDepots {
 				sharedDepots[ValveKeyValueNode(unsigned: depotId)] = ValveKeyValueNode(unsigned: appId)
 			}
 			vdf.append(sharedDepots)
 		}
 
-		var userConfig = ValveKeyValue(ValveKeyValueNode("UserConfig"))
+		let userConfig = ValveKeyValue(ValveKeyValueNode("UserConfig"))
 		for config in self.userConfig.values {
 			userConfig.append(config)
 		}
 		vdf.append(userConfig)
 
-		var mountedConfig = ValveKeyValue(ValveKeyValueNode("MountedConfig"))
+		let mountedConfig = ValveKeyValue(ValveKeyValueNode("MountedConfig"))
 		for config: ValveKeyValue in self.mountedConfig.values {
 			mountedConfig.append(config)
 		}
