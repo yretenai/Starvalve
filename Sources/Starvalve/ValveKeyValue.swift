@@ -5,31 +5,31 @@
 public struct ValveKeyValueNode {
 	public let value: (any StringProtocol)?
 
-	init() {
+	public init() {
 		self.value = nil
 	}
 
-	init(_ string: any StringProtocol) {
+	public init(_ string: any StringProtocol) {
 		self.value = string
 	}
 
-	init(signed: Int) {
+	public init(signed: Int) {
 		self.value = String(signed)
 	}
 
-	init(unsigned: UInt) {
+	public init(unsigned: UInt) {
 		self.value = String(unsigned)
 	}
 
-	init(float: Float) {
+	public init(float: Float) {
 		self.value = String(describing: float)
 	}
 
-	init(double: Double) {
+	public init(double: Double) {
 		self.value = String(describing: double)
 	}
 
-	init(bool: Bool) {
+	public init(bool: Bool) {
 		self.value = bool ? "1" : "0"
 	}
 
@@ -109,7 +109,7 @@ public struct ValveKeyValueNode {
 /// An element for VDF structures.
 public class ValveKeyValue: Sequence {
 	public typealias Element = ValveKeyValue
-	public typealias Iterator = Array<ValveKeyValue>.Iterator
+	public typealias Iterator = [ValveKeyValue].Iterator
 
 	public let key: ValveKeyValueNode
 	public var value: ValveKeyValueNode
@@ -125,17 +125,17 @@ public class ValveKeyValue: Sequence {
 		}
 	}
 
-	init(_ key: ValveKeyValueNode) {
+	public init(_ key: ValveKeyValueNode) {
 		self.key = key
 		self.value = ValveKeyValueNode()
 	}
 
-	init(key: ValveKeyValueNode, value: ValveKeyValueNode) {
+	public init(key: ValveKeyValueNode, value: ValveKeyValueNode) {
 		self.key = key
 		self.value = value
 	}
 
-	init(key: ValveKeyValueNode, children: [ValveKeyValue]) {
+	public init(key: ValveKeyValueNode, children: [ValveKeyValue]) {
 		self.key = key
 		self.value = ValveKeyValueNode()
 		self.children = children

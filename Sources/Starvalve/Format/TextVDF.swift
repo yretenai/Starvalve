@@ -15,15 +15,6 @@ extension CharacterSet {
 	}
 }
 
-public enum TextVDFError: Error {
-	case unexpectedToken
-	case unterminatedString
-	case truncated
-	case insertingIntoRootValue
-	case missingKey
-	case missingValue
-}
-
 class TextVDFLexer {
 	private let content: String
 	private var index: String.Index
