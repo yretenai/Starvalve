@@ -53,7 +53,7 @@ let acfSample = """
 		"SizeOnDisk"		"5772874506"
 		"StagingSize"		"0"
 		"buildid"		"16557524"
-		"LastOwner"		"76561198027374592"
+		"LastOwner"		"76561197960265728"
 		"UpdateResult"		"0"
 		"BytesToDownload"		"6116747936"
 		"BytesDownloaded"		"6116747936"
@@ -170,7 +170,7 @@ let acfSample = """
 	#expect(acf.sizeOnDisk == 5_772_874_506)
 	#expect(acf.stagingSize == 0)
 	#expect(acf.buildID == 16_557_524)
-	#expect(acf.lastOwner == 76_561_198_027_374_592)
+	#expect(acf.lastOwner.rawValue == 76_561_197_960_265_728)
 	#expect(acf.updateResult == .success)
 	#expect(acf.bytesToDownload == 6_116_747_936)
 	#expect(acf.bytesDownloaded == 6_116_747_936)

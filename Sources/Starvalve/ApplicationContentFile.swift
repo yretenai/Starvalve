@@ -31,15 +31,6 @@ public struct ACFAppState: OptionSet, Sendable {
 	}
 }
 
-/// Which platform this game was installed on.
-public enum ACFUniverse: Int {
-	case invalid
-	case steam
-	case beta
-	case closed
-	case dev
-}
-
 /// Whether or not an update recently succeeded.
 public enum ACFUpdateResult: UInt {
 	case success
@@ -86,7 +77,7 @@ public struct ACFInstalledApplicationDepot {
 /// ACF file format structure.
 public struct ApplicationContentFile {
 	public var appId: UInt
-	public var universe: ACFUniverse = .steam
+	public var universe: SteamUniverse = .steam
 	public var name: String
 	public var stateFlags: ACFAppState = []
 	public var installDir: String
@@ -95,7 +86,7 @@ public struct ApplicationContentFile {
 	public var sizeOnDisk: UInt = 0
 	public var stagingSize: UInt = 0
 	public var buildID: UInt = 0
-	public var lastOwner: UInt = 0
+	public var lastOwner: SteamID = SteamID()
 	public var updateResult: ACFUpdateResult = .success
 	public var bytesToDownload: UInt = 0
 	public var bytesDownloaded: UInt = 0
@@ -124,7 +115,7 @@ public struct ApplicationContentFile {
 		}
 
 		self.appId = appId
-		universe = ACFUniverse(rawValue: kv["universe"]?.signed ?? 0) ?? .invalid
+		universe = SteamUniverse(rawValue: kv["universe"]?.signed ?? 0) ?? .invalid
 		name = String(describing: kv["Name"]?.string ?? "SteamApp\(appId)")
 		stateFlags = ACFAppState(rawValue: kv["StateFlags"]?.unsigned ?? 0)
 		installDir = String(describing: kv["InstallDir"]?.string ?? "SteamApp")
@@ -133,7 +124,7 @@ public struct ApplicationContentFile {
 		sizeOnDisk = kv["SizeOnDisk"]?.unsigned ?? 0
 		stagingSize = kv["StagingSize"]?.unsigned ?? 0
 		buildID = kv["BuildID"]?.unsigned ?? 0
-		lastOwner = kv["LastOwner"]?.unsigned ?? 0
+		lastOwner = SteamID(kv["LastOwner"]?.unsigned ?? 0)
 		updateResult = ACFUpdateResult(rawValue: kv["UpdateResult"]?.unsigned ?? 0) ?? .success
 		bytesToDownload = kv["BytesToDownload"]?.unsigned ?? 0
 		bytesDownloaded = kv["BytesDownloaded"]?.unsigned ?? 0
@@ -217,7 +208,7 @@ public struct ApplicationContentFile {
 		vdf[ValveKeyValueNode("SizeOnDisk")] = ValveKeyValueNode(unsigned: sizeOnDisk)
 		vdf[ValveKeyValueNode("StagingSize")] = ValveKeyValueNode(unsigned: stagingSize)
 		vdf[ValveKeyValueNode("buildid")] = ValveKeyValueNode(unsigned: buildID)
-		vdf[ValveKeyValueNode("LastOwner")] = ValveKeyValueNode(unsigned: lastOwner)
+		vdf[ValveKeyValueNode("LastOwner")] = ValveKeyValueNode(unsigned: lastOwner.rawValue)
 		vdf[ValveKeyValueNode("UpdateResult")] = ValveKeyValueNode(unsigned: updateResult.rawValue)
 		vdf[ValveKeyValueNode("BytesToDownload")] = ValveKeyValueNode(unsigned: bytesToDownload)
 		vdf[ValveKeyValueNode("BytesDownloaded")] = ValveKeyValueNode(unsigned: bytesDownloaded)
