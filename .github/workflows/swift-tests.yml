@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        swift: ["6.0.2"]
+        swift: ["6.0.3"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: yretenai/setup-swift@edge
