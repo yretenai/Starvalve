@@ -1,5 +1,5 @@
-// Targets are the basic building blocks of a package, defining a module or a test suite.
-// Targets can depend on other targets in this package and products from dependencies.
+// SPDX-FileCopyrightText: 2024 Legiayayana <ada@chronovore.dev>
+// SPDX-License-Identifier: EUPL-1.2
 
 import Foundation
 import Testing
