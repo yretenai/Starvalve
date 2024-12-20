@@ -111,7 +111,7 @@ public class ValveKeyValue: Sequence {
 	public typealias Element = ValveKeyValue
 	public typealias Iterator = [ValveKeyValue].Iterator
 
-	public let key: ValveKeyValueNode
+	public var key: ValveKeyValueNode
 	public var value: ValveKeyValueNode
 	public var children: [ValveKeyValue] = []
 

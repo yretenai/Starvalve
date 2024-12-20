@@ -21,7 +21,7 @@ public struct SteamAppData {
 	public let hash: Data
 	public let vdf: ValveKeyValue
 
-	internal init?(version: Int, data: DataCursor, stringTable: [String]?) throws {
+	internal init?(version: Int, data: DataCursor, stringTable: [ValveKeyValueNode]?) throws {
 		appId = try data.read(as: UInt32.self)
 		if appId == 0xFFFF_FFFF || appId == 0 {
 			return nil
@@ -35,14 +35,20 @@ public struct SteamAppData {
 		contentId = try data.read(as: UInt64.self)
 		textHash = try data.readBytes(count: 20)
 		changeId = try data.read(as: UInt32.self)
-		if version >= 28 {
+		if version >= 0x28 {
 			hash = try data.readBytes(count: 20)
 		} else {
 			hash = textHash
 		}
-		vdf = ValveKeyValue(ValveKeyValueNode(""))  // todo: read binary object
 
-		data.index = end
+		guard let vdf = try BinaryVDF.read(data: data, stringTable: stringTable) else {
+			throw SteamAppInfoError.invalidVdf
+		}
+		self.vdf = vdf
+
+		guard data.index == end else {
+			throw SteamAppInfoError.invalidVdf
+		}
 	}
 }
 
@@ -52,16 +58,16 @@ public struct SteamAppInfo {
 	public let universe: SteamUniverse
 	public let apps: [SteamAppData]
 
-	public init(version: Int, data: Data) throws {
+	public init(data: Data) throws {
 		let cursor = DataCursor(data)
 		let version = try cursor.read(as: UInt32.self)
-		guard (version & 0xFFFFFF) == 0x75644 else {
+		guard (version >> 8) == 0x75644 else {
 			throw SteamAppInfoError.unsupported
 		}
 
-		self.version = Int(version >> 24)
+		self.version = Int(version & 0xFF)
 
-		guard self.version >= 27 && self.version <= 29 else {
+		guard self.version >= 0x27 && self.version <= 0x29 else {
 			throw SteamAppInfoError.unsupported
 		}
 
@@ -71,20 +77,21 @@ public struct SteamAppInfo {
 
 		self.universe = universe
 
-		var stringTable: [String]? = nil
-		if version >= 29 {
-			let stringTableOffset = try cursor.read(as: UInt64.self)
-			let stringTableCursor = DataCursor(data[stringTableOffset...])
+		var stringTable: [ValveKeyValueNode]? = nil
+		if version >= 0x29 {
+			let stringTableCursor = DataCursor(data)
+			stringTableCursor.index = Data.Index(try cursor.read(as: UInt64.self))
+
 			let stringCount = Int(try stringTableCursor.read(as: UInt32.self))
-			var table = Array(repeating: "", count: stringCount)
-			for index in 0...stringCount {
-				table[index] = try stringTableCursor.readUnicodeString()
+			var table: [ValveKeyValueNode] = []
+			for _ in 0...stringCount - 1 {
+				table.append(ValveKeyValueNode(try stringTableCursor.readUtf8String()))
 			}
 			stringTable = table
 		}
 
 		var apps: [SteamAppData] = []
-		while let app = try? SteamAppData(version: self.version, data: cursor, stringTable: stringTable) {
+		while let app = try SteamAppData(version: self.version, data: cursor, stringTable: stringTable) {
 			apps.append(app)
 		}
 		self.apps = apps

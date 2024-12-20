@@ -19,12 +19,16 @@ public struct SteamPackageData {
 
 		hash = try data.readBytes(count: 20)
 		changeId = try data.read(as: UInt32.self)
-		if version >= 28 {
+		if version >= 0x28 {
 			contentId = try data.read(as: UInt64.self)
 		} else {
 			contentId = 0
 		}
-		vdf = ValveKeyValue(ValveKeyValueNode(""))  // todo: read binary object
+
+		guard let vdf = try BinaryVDF.read(data: data) else {
+			throw SteamAppInfoError.invalidVdf
+		}
+		self.vdf = vdf
 	}
 }
 
@@ -34,16 +38,16 @@ public struct SteamPackageInfo {
 	public let universe: SteamUniverse
 	public let packages: [SteamPackageData]
 
-	public init(version: Int, data: Data) throws {
+	public init(data: Data) throws {
 		let cursor = DataCursor(data)
 		let version = try cursor.read(as: UInt32.self)
-		guard (version & 0xFFFFFF) == 0x75644 else {
+		guard (version >> 8) == 0x65655 else {
 			throw SteamAppInfoError.unsupported
 		}
 
-		self.version = Int(version >> 24)
+		self.version = Int(version & 0xFF)
 
-		guard self.version >= 27 && self.version <= 28 else {
+		guard self.version >= 0x27 && self.version <= 0x28 else {
 			throw SteamAppInfoError.unsupported
 		}
 
@@ -54,7 +58,7 @@ public struct SteamPackageInfo {
 		self.universe = universe
 
 		var packages: [SteamPackageData] = []
-		while let package = try? SteamPackageData(version: self.version, data: cursor) {
+		while let package = try SteamPackageData(version: self.version, data: cursor) {
 			packages.append(package)
 		}
 		self.packages = packages

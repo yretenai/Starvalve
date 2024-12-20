@@ -190,3 +190,21 @@ let acfSample = """
 
 	#expect(text == acfSample)
 }
+
+@Test func packageInfoTest() throws {
+	guard let data = try? Data(contentsOf: URL(fileURLWithPath: "~/.steam/steam/appcache/packageinfo.vdf")) else {
+		return
+	}
+	let vdf = try #require(try SteamPackageInfo(data: data))
+	#expect(vdf.version == 0x28)
+	#expect(vdf.packages.count > 1)
+}
+
+@Test func appInfoTest() throws {
+	guard let data = try? Data(contentsOf: URL(fileURLWithPath: "~/.steam/steam/appcache/appinfo.vdf")) else {
+		return
+	}
+	let vdf = try #require(try SteamAppInfo(data: data))
+	#expect(vdf.version == 0x29)
+	#expect(vdf.apps.count > 1)
+}

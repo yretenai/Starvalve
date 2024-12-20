@@ -8,6 +8,7 @@ enum DataCursorError: Error {
 
 public enum SteamAppInfoError: Error {
 	case unsupported
+	case invalidVdf
 }
 
 public enum TextVDFError: Error {
@@ -17,4 +18,10 @@ public enum TextVDFError: Error {
 	case insertingIntoRootValue
 	case missingKey
 	case missingValue
+}
+
+public enum BinaryVDFError: Error {
+	case stringIndexOutOfRange
+	case invalidToken
+	case notSupported
 }
