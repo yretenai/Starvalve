@@ -49,6 +49,16 @@ class BinaryVDFReader {
 		return stringTable[index]
 	}
 
+	func readObject(key: ValveKeyValueNode) throws -> ValveKeyValue {
+		let kv = ValveKeyValue(key)
+
+		while let child = try read() {
+			kv.append(child)
+		}
+
+		return kv
+	}
+
 	func read() throws -> ValveKeyValue? {
 		let token = BinaryVDFToken(rawValue: try cursor.read()) ?? .invalid
 		if token == .invalid {
@@ -59,7 +69,7 @@ class BinaryVDFReader {
 			return nil
 		}
 
-		let kv: ValveKeyValue = ValveKeyValue(try readKey())
+		let kv = ValveKeyValue(try readKey())
 
 		switch token {
 			case .blob: throw BinaryVDFError.notSupported
@@ -71,11 +81,7 @@ class BinaryVDFReader {
 			case .uint32: kv.unsigned = UInt(try cursor.read(as: UInt32.self))
 			case .utf16String: kv.string = try cursor.readUtf16String()
 			case .utf8String: kv.string = try cursor.readUtf8String()
-			case .startObject:
-				while let child = try read() {
-					kv.append(child)
-				}
-
+			case .startObject: return try readObject(key: kv.key)
 			default: break
 		}
 
@@ -87,17 +93,13 @@ class BinaryVDFReader {
 public struct BinaryVDF {
 	@available(*, unavailable) private init() {}
 
-	static func read(data: DataCursor, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
+	static func read(key: ValveKeyValueNode, data: DataCursor, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
 		let reader = try BinaryVDFReader(data: data, stringTable: stringTable)
-		guard let value = try reader.read() else {
-			return nil
-		}
-		data.index = data.index + 1
-		return value
+		return try reader.readObject(key: key)
 	}
 
-	public static func read(data: Data, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
+	public static func read(key: ValveKeyValueNode, data: Data, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
 		let reader = try BinaryVDFReader(data: DataCursor(data), stringTable: stringTable)
-		return try reader.read()
+		return try reader.readObject(key: key)
 	}
 }
