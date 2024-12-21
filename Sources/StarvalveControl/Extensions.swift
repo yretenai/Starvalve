@@ -3,12 +3,6 @@
 
 import Foundation
 
-#if os(macOS)
-	@usableFromInline typealias FileBool = ObjCBool
-#else
-	@usableFromInline typealias FileBool = Bool
-#endif
-
 enum ByteFormatting: UInt {
 	case baseTen = 1000
 	case powerOfTwo = 1024
@@ -26,30 +20,54 @@ enum ASCIIColor: String {
 	case `default` = "\u{001B}[0;0m"
 }
 
-extension FileManager {
-	@inlinable func dirExists(atPath url: URL) -> Bool {
-		guard url.isFileURL else {
-			return false
+extension URL {
+	@inlinable var canonicalPath: URL {
+		guard let path = try? resourceValues(forKeys: [.canonicalPathKey]).canonicalPath else {
+			return self
 		}
 
-		var isDirectory: FileBool = false
-		guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
-			return false
-		}
-
-		#if os(macOS)
-			return isDirectory.boolValue
-		#else
-			return isDirectory
-		#endif
+		return URL(filePath: path)
 	}
 
-	@inlinable func fileExists(atPath url: URL) -> Bool {
-		guard url.isFileURL else {
-			return false
+	@inlinable var isDirectory: Bool {
+		(try? resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
+	}
+
+	@inlinable var isFile: Bool {
+		(try? resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) ?? false
+	}
+
+	@inlinable var isSymbolicLink: Bool {
+		(try? resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) ?? false
+	}
+
+	@inlinable var isWritable: Bool {
+		(try? resourceValues(forKeys: [.isWritableKey]).isWritable) ?? false
+	}
+
+	@inlinable var isReadable: Bool {
+		(try? resourceValues(forKeys: [.isReadableKey]).isReadable) ?? false
+	}
+}
+
+extension FileManager {
+	func directorySize(atPath path: URL) throws -> UInt {
+		var size: UInt = 0
+
+		let files = try FileManager.default.subpathsOfDirectory(atPath: path.path)
+		for file in files {
+			guard let attributes = try? FileManager.default.attributesOfItem(atPath: path.appending(path: file).path) else {
+				continue
+			}
+
+			guard let fileSize = attributes[.size] as? Int64 else {
+				continue
+			}
+
+			size = size + UInt(fileSize)
 		}
 
-		return FileManager.default.fileExists(atPath: url.path)
+		return size
 	}
 }
 

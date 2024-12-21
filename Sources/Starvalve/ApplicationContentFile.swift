@@ -54,13 +54,11 @@ public enum ACFBackgroundUpdateBehavior: UInt {
 /// An installed depot with it's manifest and size.
 public struct ACFInstalledApplicationDepot: VDFContent {
 	public let depotId: UInt
-	public var manifest: UInt
-	public var size: UInt
+	public var manifest: UInt = 0
+	public var size: UInt = 0
 
-	public init(depotId: UInt, manifest: UInt, size: UInt) {
+	public init(depotId: UInt) {
 		self.depotId = depotId
-		self.manifest = manifest
-		self.size = size
 	}
 
 	public init?(vdf: ValveKeyValue) {
@@ -77,15 +75,77 @@ public struct ACFInstalledApplicationDepot: VDFContent {
 	}
 }
 
+/// Determines what kind of ACF manifest this is.
+public enum ACFType: String {
+	case appState = "AppState"
+	case appWorkshop = "AppWorkshop"
+}
+
+/// Minimal data for workshop items, used to mark one as installed.
+public class ACFWorkshopItem: VDFContent {
+	public let ugcId: UInt
+	public var size: UInt = 0
+	public var timeUpdated: Date = Date(timeIntervalSince1970: 0)
+	public var manifest: Int = -1
+	public var ugcHandle: UInt = 0
+
+	public init(ugcId: UInt) {
+		self.ugcId = ugcId
+	}
+
+	public required init?(vdf: ValveKeyValue) {
+		ugcId = vdf.key.unsigned ?? 0
+		size = vdf["Size"]?.unsigned ?? 0
+		timeUpdated = vdf["TimeUpdated"]?.date ?? Date(timeIntervalSince1970: 0)
+		manifest = vdf["Manifest"]?.signed ?? -1
+		ugcHandle = vdf["UGCHandle"]?.unsigned ?? 0
+	}
+
+	public func vdf() -> ValveKeyValue {
+		let vdf = ValveKeyValue(ValveKeyValueNode(unsigned: ugcId))
+		vdf["size"] = ValveKeyValueNode(unsigned: size)
+		vdf["timeupdated"] = ValveKeyValueNode(epoch: timeUpdated)
+		vdf["manifest"] = ValveKeyValueNode(signed: manifest)
+		vdf["ugchandle"] = ValveKeyValueNode(unsigned: ugcHandle)
+		return vdf
+	}
+}
+
+/// Detailed data for workshop items.
+public class ACFWorkshopItemDetails: ACFWorkshopItem {
+	public var timeTouched: Date = Date(timeIntervalSince1970: 0)
+	public var latestTimeUpdated: Date = Date(timeIntervalSince1970: 0)
+	public var subscribedBy: SteamID = SteamID(accountID: 0)
+	public var latestManifest: Int = -1
+
+	public required init?(vdf: ValveKeyValue) {
+		super.init(vdf: vdf)
+		timeTouched = vdf["TimeTouched"]?.date ?? Date(timeIntervalSince1970: 0)
+		latestTimeUpdated = vdf["Latest_TimeUpdated"]?.date ?? Date(timeIntervalSince1970: 0)
+		subscribedBy = SteamID(accountID: vdf["SubscribedBy"]?.unsigned ?? 0)
+		manifest = vdf["Latest_Manifest"]?.signed ?? -1
+	}
+
+	public override func vdf() -> ValveKeyValue {
+		let vdf = super.vdf()
+		vdf["timetouched"] = ValveKeyValueNode(epoch: timeTouched)
+		vdf["latest_timeupdated"] = ValveKeyValueNode(epoch: latestTimeUpdated)
+		vdf["subscribedby"] = ValveKeyValueNode(unsigned: subscribedBy.accountID)
+		vdf["latest_manifest"] = ValveKeyValueNode(signed: latestManifest)
+		return vdf
+	}
+}
+
 /// ACF file format structure.
 public struct ApplicationContentFile: VDFContent {
-	public var appId: UInt
+	public let type: ACFType
+	public var appId: UInt = 0
 	public var universe: SteamUniverse = .steam
-	public var name: String
+	public var name: String = ""
 	public var stateFlags: ACFAppState = []
-	public var installDir: String
-	public var lastUpdated: Date = Date.now
-	public var lastPlayed: Date = Date(timeIntervalSince1970: TimeInterval(0))
+	public var installDir: String = ""
+	public var lastUpdated: Date = Date(timeIntervalSince1970: 0)
+	public var lastPlayed: Date = Date(timeIntervalSince1970: 0)
 	public var sizeOnDisk: UInt = 0
 	public var stagingSize: UInt = 0
 	public var buildID: UInt = 0
@@ -98,35 +158,46 @@ public struct ApplicationContentFile: VDFContent {
 	public var targetBuildID: UInt = 0
 	public var autoUpdateBehavior: ACFAutoUpdateBehavior = .automatic
 	public var allowOtherDownloadsWhileRunning: ACFBackgroundUpdateBehavior = .deferToGlobalSetting
-	public var scheduledAutoUpdate: Date = Date(timeIntervalSince1970: TimeInterval(0))
+	public var scheduledAutoUpdate: Date = Date(timeIntervalSince1970: 0)
 	public var stagingFolder: Int?  // index of library folder in libraryfolders.vdf
+	public var needsUpdate: Bool = false
+	public var needsDownload: Bool = false
+	public var lastBuildId: Bool = false
 	public var installedDepots: [UInt: ACFInstalledApplicationDepot] = [:]
 	public var sharedDepots: [UInt: UInt] = [:]
 	public var installScripts: [UInt: String] = [:]
 	public var userConfig: [String: ValveKeyValue] = [:]
 	public var mountedConfig: [String: ValveKeyValue] = [:]
+	public var workshopItems: [UInt: ACFWorkshopItem] = [:]
+	public var workshopItemDetails: [UInt: ACFWorkshopItemDetails] = [:]
 
-	public init(appId: UInt, name: String, installDir: String? = nil) {
-		self.appId = appId
-		self.name = name
-		self.installDir = installDir ?? name
+	public init(type: ACFType) {
+		self.type = type
 	}
 
 	public init?(vdf: ValveKeyValue) {
+		guard let type = ACFType(rawValue: vdf.key.string ?? "") else {
+			return nil
+		}
+
+		self.type = type
+
 		guard let appId = vdf["AppId"]?.unsigned else {
 			return nil
 		}
 
 		self.appId = appId
+
+		//state
 		universe = SteamUniverse(rawValue: vdf["universe"]?.signed ?? 0) ?? .invalid
 		name = String(describing: vdf["Name"]?.string ?? "SteamApp\(appId)")
 		stateFlags = ACFAppState(rawValue: vdf["StateFlags"]?.unsigned ?? 0)
 		installDir = String(describing: vdf["InstallDir"]?.string ?? "SteamApp")
-		lastUpdated = Date(timeIntervalSince1970: TimeInterval(vdf["LastUpdated"]?.unsigned ?? 0))
-		lastPlayed = Date(timeIntervalSince1970: TimeInterval(vdf["LastPlayed"]?.unsigned ?? 0))
+		lastUpdated = vdf["LastUpdated"]?.date ?? vdf["TimeLastUpdated"]?.date ?? Date(timeIntervalSince1970: 0)
+		lastPlayed = vdf["LastPlayed"]?.date ?? vdf["TimeLastAppRan"]?.date ?? Date(timeIntervalSince1970: 0)
 		sizeOnDisk = vdf["SizeOnDisk"]?.unsigned ?? 0
 		stagingSize = vdf["StagingSize"]?.unsigned ?? 0
-		buildID = vdf["BuildID"]?.unsigned ?? 0
+		buildID = vdf["BuildID"]?.unsigned ?? vdf["LastBuildID"]?.unsigned ?? 0
 		lastOwner = SteamID(vdf["LastOwner"]?.unsigned ?? 0)
 		updateResult = ACFUpdateResult(rawValue: vdf["UpdateResult"]?.unsigned ?? 0) ?? .success
 		bytesToDownload = vdf["BytesToDownload"]?.unsigned ?? 0
@@ -136,16 +207,50 @@ public struct ApplicationContentFile: VDFContent {
 		targetBuildID = vdf["TargetBuildID"]?.unsigned ?? 0
 		autoUpdateBehavior = ACFAutoUpdateBehavior(rawValue: vdf["AutoUpdateBehavior"]?.unsigned ?? 0) ?? .automatic
 		allowOtherDownloadsWhileRunning = ACFBackgroundUpdateBehavior(rawValue: vdf["AllowOtherDownloadsWhileRunning"]?.unsigned ?? 0) ?? .deferToGlobalSetting
-		scheduledAutoUpdate = Date(timeIntervalSince1970: TimeInterval(vdf["ScheduledAutoUpdate"]?.unsigned ?? 0))
+		scheduledAutoUpdate = vdf["ScheduledAutoUpdate"]?.date ?? Date(timeIntervalSince1970: 0)
 		stagingFolder = vdf["StagingFolder"]?.signed
 		installedDepots = vdf["InstalledDepots"]?.to(key: UInt.self, value: ACFInstalledApplicationDepot.self) ?? [:]
 		installScripts = vdf["InstallScripts"]?.to(key: UInt.self, value: String.self) ?? [:]
 		sharedDepots = vdf["SharedDepots"]?.to(key: UInt.self, value: UInt.self) ?? [:]
 		userConfig = vdf["UserConfig"]?.to(key: String.self, value: ValveKeyValue.self) ?? [:]
 		mountedConfig = vdf["MountedConfig"]?.to(key: String.self, value: ValveKeyValue.self) ?? [:]
+
+		// workshop
+		if vdf["NeedsUpdate"]?.bool ?? false {
+			stateFlags.insert(.updateRequired)
+		}
+
+		if vdf["NeedsDownload"]?.bool ?? false {
+			stateFlags.insert(.filesMissing)
+		}
+
+		workshopItems = vdf["WorkshopItemsInstalled"]?.to(key: UInt.self, value: ACFWorkshopItem.self) ?? [:]
+		workshopItemDetails = vdf["WorkshopItemDetails"]?.to(key: UInt.self, value: ACFWorkshopItemDetails.self) ?? [:]
 	}
 
 	public func vdf() -> ValveKeyValue {
+		switch type {
+			case .appState: return appStateVdf()
+			case .appWorkshop: return appWorkshopVdf()
+		}
+	}
+
+	private func appWorkshopVdf() -> ValveKeyValue {
+		let vdf = ValveKeyValue("AppWorkshop")
+
+		vdf["appid"] = ValveKeyValueNode(unsigned: appId)
+		vdf["SizeOnDisk"] = ValveKeyValueNode(unsigned: sizeOnDisk)
+		vdf["NeedsUpdate"] = ValveKeyValueNode(bool: stateFlags.contains(.updateRequired))
+		vdf["NeedsDownload"] = ValveKeyValueNode(bool: stateFlags.contains(.filesMissing))
+		vdf["TimeLastUpdated"] = ValveKeyValueNode(epoch: lastUpdated)
+		vdf["TimeLastAppRan"] = ValveKeyValueNode(epoch: lastPlayed)
+		vdf.append(ValveKeyValue(key: "WorkshopItemsInstalled", map: workshopItems))
+		vdf.append(ValveKeyValue(key: "WorkshopItemDetails", map: workshopItemDetails))
+
+		return vdf
+	}
+
+	private func appStateVdf() -> ValveKeyValue {
 		let vdf = ValveKeyValue("AppState")
 
 		vdf["appid"] = ValveKeyValueNode(unsigned: appId)
@@ -153,8 +258,8 @@ public struct ApplicationContentFile: VDFContent {
 		vdf["name"] = ValveKeyValueNode(name)
 		vdf["stateFlags"] = ValveKeyValueNode(unsigned: stateFlags.rawValue)
 		vdf["installdir"] = ValveKeyValueNode(installDir)
-		vdf["LastUpdated"] = ValveKeyValueNode(unsigned: UInt(lastUpdated.timeIntervalSince1970))
-		vdf["LastPlayed"] = ValveKeyValueNode(unsigned: UInt(lastPlayed.timeIntervalSince1970))
+		vdf["LastUpdated"] = ValveKeyValueNode(epoch: lastUpdated)
+		vdf["LastPlayed"] = ValveKeyValueNode(epoch: lastPlayed)
 		vdf["SizeOnDisk"] = ValveKeyValueNode(unsigned: sizeOnDisk)
 		vdf["StagingSize"] = ValveKeyValueNode(unsigned: stagingSize)
 		vdf["buildid"] = ValveKeyValueNode(unsigned: buildID)
@@ -167,7 +272,7 @@ public struct ApplicationContentFile: VDFContent {
 		vdf["TargetBuildID"] = ValveKeyValueNode(unsigned: targetBuildID)
 		vdf["AutoUpdateBehavior"] = ValveKeyValueNode(unsigned: autoUpdateBehavior.rawValue)
 		vdf["AllowOtherDownloadsWhileRunning"] = ValveKeyValueNode(unsigned: allowOtherDownloadsWhileRunning.rawValue)
-		vdf["ScheduledAutoUpdate"] = ValveKeyValueNode(unsigned: UInt(scheduledAutoUpdate.timeIntervalSince1970))
+		vdf["ScheduledAutoUpdate"] = ValveKeyValueNode(epoch: scheduledAutoUpdate)
 
 		if let stagingFolder = stagingFolder {
 			vdf["StagingFolder"] = ValveKeyValueNode(signed: stagingFolder)

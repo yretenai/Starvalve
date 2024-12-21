@@ -8,20 +8,63 @@ import Starvalve
 	import WinSDK
 #endif
 
+struct AppInfo {
+	let acf: ApplicationContentFile
+	let workshop: ApplicationContentFile?
+	let compatDataSize: UInt
+	let shaderCacheSize: UInt
+
+	init?(libraryPath library: URL, appId: UInt) {
+		let path = library.appending(path: "steamapps/appmanifest_\(appId).acf", directoryHint: .notDirectory)
+		guard let vdf = try? TextVDF.read(url: path) else {
+			return nil
+		}
+
+		guard let acf = ApplicationContentFile(vdf: vdf) else {
+			return nil
+		}
+
+		self.acf = acf
+
+		let workshopPath = library.appending(path: "steamapps/workshop/appworkshop_\(appId).acf", directoryHint: .notDirectory)
+		if let vdf = try? TextVDF.read(url: workshopPath),
+			let workshopAcf = ApplicationContentFile(vdf: vdf)
+		{
+			workshop = workshopAcf
+		} else {
+			workshop = nil
+		}
+
+		let compatDataPath = library.appending(path: "steamapps/compatdata/\(appId)", directoryHint: .isDirectory)
+		if compatDataPath.isDirectory {
+			self.compatDataSize = (try? FileManager.default.directorySize(atPath: compatDataPath)) ?? 0
+		} else {
+			self.compatDataSize = 0
+		}
+
+		let shaderCachePath = library.appending(path: "steamapps/shadercache/\(appId)", directoryHint: .isDirectory)
+		if shaderCachePath.isDirectory {
+			self.shaderCacheSize = (try? FileManager.default.directorySize(atPath: shaderCachePath)) ?? 0
+		} else {
+			self.shaderCacheSize = 0
+		}
+	}
+}
+
 struct SteamHelper {
 	let steamPath: URL
 
 	init(steamPath: String?) {
 		if let steamPath = steamPath {
-			self.steamPath = URL(filePath: steamPath, directoryHint: .isDirectory)
+			self.steamPath = URL(filePath: steamPath, directoryHint: .isDirectory).canonicalPath
 		} else {
 			guard let steamPath = SteamHelper.findSteam() else {
 				preconditionFailure("Could not locate Steam installation")
 			}
-			self.steamPath = steamPath
+			self.steamPath = steamPath.canonicalPath
 		}
 
-		guard FileManager.default.dirExists(atPath: self.steamPath) else {
+		guard self.steamPath.isDirectory else {
 			preconditionFailure("Path \"\(self.steamPath)\" does not exist")
 		}
 	}

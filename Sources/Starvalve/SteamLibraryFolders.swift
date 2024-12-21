@@ -9,9 +9,10 @@ public struct SteamLibraryFolder: VDFContent {
 	public var label: String? = nil
 	public var contentID: UInt = 0
 	public var totalSize: UInt = 0
+	public var appSize: UInt = 0
 	public var updateCleanBytesTally: UInt = 0
-	public var timeLastUpdateCorrpution: Date = Date(timeIntervalSince1970: TimeInterval(0))
-	public var timeLastUpdateVerified: Date = Date(timeIntervalSince1970: TimeInterval(0))
+	public var timeLastUpdateCorrpution: Date = Date(timeIntervalSince1970: 0)
+	public var timeLastUpdateVerified: Date = Date(timeIntervalSince1970: 0)
 	public var apps: [UInt: UInt] = [:]
 
 	public init?(vdf: ValveKeyValue) {
@@ -28,9 +29,13 @@ public struct SteamLibraryFolder: VDFContent {
 		contentID = vdf["contentID"]?.unsigned ?? 0
 		totalSize = vdf["totalSize"]?.unsigned ?? 0
 		updateCleanBytesTally = vdf["update_clean_bytes_tally"]?.unsigned ?? 0
-		timeLastUpdateCorrpution = Date(timeIntervalSince1970: TimeInterval(vdf["time_last_update_corruption"]?.unsigned ?? 0))
-		timeLastUpdateVerified = Date(timeIntervalSince1970: TimeInterval(vdf["time_last_update_verified"]?.unsigned ?? 0))
+		timeLastUpdateCorrpution = vdf["time_last_update_corruption"]?.date ?? Date(timeIntervalSince1970: 0)
+		timeLastUpdateVerified = vdf["time_last_update_verified"]?.date ?? Date(timeIntervalSince1970: 0)
 		apps = vdf["apps"]?.to(key: UInt.self, value: UInt.self) ?? [:]
+
+		appSize = apps.map { (key, value) in
+			value
+		}.reduce(0, +)
 	}
 
 	public func vdf() -> ValveKeyValue {
@@ -41,9 +46,9 @@ public struct SteamLibraryFolder: VDFContent {
 		vdf["totalsize"] = ValveKeyValueNode(unsigned: totalSize)
 		vdf["update_clean_bytes_tally"] = ValveKeyValueNode(unsigned: updateCleanBytesTally)
 		if timeLastUpdateCorrpution.timeIntervalSince1970 > 0 {
-			vdf["time_last_update_corruption"] = ValveKeyValueNode(unsigned: UInt(timeLastUpdateCorrpution.timeIntervalSince1970))
+			vdf["time_last_update_corruption"] = ValveKeyValueNode(epoch: timeLastUpdateCorrpution)
 		}
-		vdf["time_last_update_verified"] = ValveKeyValueNode(unsigned: UInt(timeLastUpdateVerified.timeIntervalSince1970))
+		vdf["time_last_update_verified"] = ValveKeyValueNode(epoch: timeLastUpdateVerified)
 		vdf.append(ValveKeyValue(key: "apps", map: apps))
 		return vdf
 	}

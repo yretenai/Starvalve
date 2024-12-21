@@ -11,6 +11,9 @@ struct ListLibrariesCommand: ParsableCommand {
 		abstract: "Lists Steam Libraries"
 	)
 
+	@Flag(help: "Print detailed app storage usage")
+	var detailed: Bool = false
+
 	@OptionGroup var globals: GlobalOptions
 
 	func run() {
@@ -36,7 +39,7 @@ struct ListLibrariesCommand: ParsableCommand {
 		}
 
 		for library in libraries.entries {
-			print("library \(library.path.path, color: .green)\"")
+			print("library \(library.path.path, color: .green)")
 
 			if let label = library.label {
 				print("label: \(label, color: .default)")
@@ -44,25 +47,47 @@ struct ListLibrariesCommand: ParsableCommand {
 				print("label: \("<no label>", color: .red)")
 			}
 
-			if FileManager.default.fileExists(atPath: library.path) {
+			if library.path.isDirectory {
 				print("exists: \("yes", color: .green)")
 			} else {
 				print("exists: \("no", color: .red)")
 			}
 
 			print("content id: \(library.contentID, color: .magenta)")
-			print("size: \(library.totalSize.formatted(byteBase: .powerOfTwo), color: .yellow)")
+			print("storage size: \(library.totalSize.formatted(byteBase: .powerOfTwo), color: .yellow)")
+			print("size: \(library.appSize.formatted(byteBase: .powerOfTwo), color: .yellow)")
 			print("update: \(library.updateCleanBytesTally.formatted(byteBase: .powerOfTwo), color: .yellow)")
 			print("verification time: \(library.timeLastUpdateVerified.nowOrNever, color: library.timeLastUpdateVerified.timeIntervalSince1970 == 0 ? .red : .green)")
 			print("corruption time: \(library.timeLastUpdateCorrpution.nowOrNever, color: library.timeLastUpdateCorrpution.timeIntervalSince1970 == 0 ? .green : .red)")
-			print("apps:")
-			for (appId, appSize) in library.apps.sorted(by: { left, right in
-				left.value > right.value
-			}) {
-				let appName = appNameMap[appId] ?? "SteamApp\(appId)"
-				print("\t\(appName, color: .green) = \(appSize.formatted(byteBase: .powerOfTwo), color: .yellow)")
+			if detailed {
+				print("apps:")
+				for (appId, appSize) in library.apps.sorted(by: { left, right in
+					left.value > right.value
+				}) {
+					let appName = appNameMap[appId] ?? "SteamApp\(appId)"
+					print("\tapp \(appName, color: .green)")
+					print("\tid \(appId, color: .magenta)")
+					print("\tsize: \(appSize.formatted(byteBase: .powerOfTwo), color: .yellow)")
+					if let appInfo = AppInfo(libraryPath: library.path, appId: appId) {
+						if let workshop = appInfo.workshop, workshop.sizeOnDisk > 0 {
+							print("\tworkshop: \(workshop.sizeOnDisk.formatted(byteBase: .powerOfTwo), color: .yellow)")
+						}
+						if appInfo.compatDataSize > 0 {
+							print("\tcompatdata: \(appInfo.compatDataSize.formatted(byteBase: .powerOfTwo), color: .yellow)")
+						}
+						if appInfo.shaderCacheSize > 0 {
+							print("\tshadercache: \(appInfo.shaderCacheSize.formatted(byteBase: .powerOfTwo), color: .yellow)")
+						}
+					} else {
+						print("\t⚠️ \("MISSING ACF", color: .red)")
+					}
+					print()
+				}
 			}
-			print("")
+
+			if !detailed || library.apps.isEmpty {
+				print()
+			}
 		}
 	}
 }

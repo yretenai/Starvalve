@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2024 Legiayayana <ada@chronovore.dev>
 // SPDX-License-Identifier: EUPL-1.2
 
+import Foundation
+
 /// Node value structure for VDF elements.
 public struct ValveKeyValueNode: VDFInitializable, ExpressibleByStringLiteral {
 	public let value: String?
@@ -42,6 +44,10 @@ public struct ValveKeyValueNode: VDFInitializable, ExpressibleByStringLiteral {
 
 	public init(bool: Bool) {
 		self.value = bool ? "1" : "0"
+	}
+
+	public init(epoch: Date) {
+		self.value = String(epoch.timeIntervalSince1970)
 	}
 
 	public init(vdfValue: ValveKeyValueNode) {
@@ -118,6 +124,14 @@ public struct ValveKeyValueNode: VDFInitializable, ExpressibleByStringLiteral {
 		}
 
 		return value == 1
+	}
+
+	public var date: Date? {
+		guard let value = unsigned else {
+			return nil
+		}
+
+		return Date(timeIntervalSince1970: TimeInterval(value))
 	}
 
 	public func vdf() -> ValveKeyValueNode {
@@ -315,6 +329,19 @@ public class ValveKeyValue: Sequence, VDFContent {
 				return
 			}
 			value = ValveKeyValueNode(bool: target)
+		}
+	}
+
+	public var date: Date? {
+		get {
+			return value.date
+		}
+		set {
+			guard let target = newValue else {
+				value = ValveKeyValueNode()
+				return
+			}
+			value = ValveKeyValueNode(epoch: target)
 		}
 	}
 
