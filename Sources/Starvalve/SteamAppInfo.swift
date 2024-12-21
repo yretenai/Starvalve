@@ -41,7 +41,7 @@ public struct SteamAppData {
 			hash = textHash
 		}
 
-		guard let vdf = try BinaryVDF.read(key: ValveKeyValueNode("AppInfo"), data: data, stringTable: stringTable) else {
+		guard let vdf = try BinaryVDF.read(key: "AppInfo", data: data, stringTable: stringTable) else {
 			throw SteamAppInfoError.invalidVdf
 		}
 		self.vdf = vdf

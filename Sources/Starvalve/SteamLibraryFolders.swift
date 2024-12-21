@@ -28,14 +28,14 @@ public struct SteamLibraryFolder: VDFContent {
 	}
 
 	public func vdf() -> ValveKeyValue {
-		let vdf = ValveKeyValue(ValveKeyValueNode("libraryfolder"))
-		vdf[ValveKeyValueNode("path")] = ValveKeyValueNode(path)
-		vdf[ValveKeyValueNode("label")] = ValveKeyValueNode(label ?? "")
-		vdf[ValveKeyValueNode("contentid")] = ValveKeyValueNode(unsigned: contentID)
-		vdf[ValveKeyValueNode("totalsize")] = ValveKeyValueNode(unsigned: totalSize)
-		vdf[ValveKeyValueNode("update_clean_bytes_tally")] = ValveKeyValueNode(unsigned: updateCleanBytesTally)
-		vdf[ValveKeyValueNode("time_last_update_verified")] = ValveKeyValueNode(unsigned: UInt(timeLastUpdateVerified.timeIntervalSince1970))
-		vdf.append(ValveKeyValue(key: ValveKeyValueNode("apps"), map: apps))
+		let vdf = ValveKeyValue("libraryfolder")
+		vdf["path"] = ValveKeyValueNode(path)
+		vdf["label"] = ValveKeyValueNode(label ?? "")
+		vdf["contentid"] = ValveKeyValueNode(unsigned: contentID)
+		vdf["totalsize"] = ValveKeyValueNode(unsigned: totalSize)
+		vdf["update_clean_bytes_tally"] = ValveKeyValueNode(unsigned: updateCleanBytesTally)
+		vdf["time_last_update_verified"] = ValveKeyValueNode(unsigned: UInt(timeLastUpdateVerified.timeIntervalSince1970))
+		vdf.append(ValveKeyValue(key: "apps", map: apps))
 		return vdf
 	}
 }
@@ -49,6 +49,6 @@ public struct SteamLibraryFolders: VDFContent {
 	}
 
 	public func vdf() -> ValveKeyValue {
-		ValveKeyValue(key: ValveKeyValueNode("libraryfolders"), sequence: entries)
+		ValveKeyValue(key: "libraryfolders", sequence: entries)
 	}
 }

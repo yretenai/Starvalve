@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 /// Node value structure for VDF elements.
-public struct ValveKeyValueNode: VDFInitializable {
+public struct ValveKeyValueNode: VDFInitializable, ExpressibleByStringLiteral {
 	public let value: (any StringProtocol)?
 
 	public init() {
@@ -11,6 +11,10 @@ public struct ValveKeyValueNode: VDFInitializable {
 
 	public init(_ string: any StringProtocol) {
 		self.value = string
+	}
+
+	public init(stringLiteral value: String) {
+		self.value = value
 	}
 
 	public init(signed: Int) {

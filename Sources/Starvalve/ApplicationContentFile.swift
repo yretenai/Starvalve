@@ -71,8 +71,8 @@ public struct ACFInstalledApplicationDepot: VDFContent {
 
 	public func vdf() -> ValveKeyValue {
 		let vdf = ValveKeyValue(ValveKeyValueNode(unsigned: depotId))
-		vdf[ValveKeyValueNode("manifest")] = ValveKeyValueNode(unsigned: manifest)
-		vdf[ValveKeyValueNode("size")] = ValveKeyValueNode(unsigned: size)
+		vdf["manifest"] = ValveKeyValueNode(unsigned: manifest)
+		vdf["size"] = ValveKeyValueNode(unsigned: size)
 		return vdf
 	}
 }
@@ -146,45 +146,45 @@ public struct ApplicationContentFile: VDFContent {
 	}
 
 	public func vdf() -> ValveKeyValue {
-		let vdf = ValveKeyValue(ValveKeyValueNode("AppState"))
+		let vdf = ValveKeyValue("AppState")
 
-		vdf[ValveKeyValueNode("appid")] = ValveKeyValueNode(unsigned: appId)
-		vdf[ValveKeyValueNode("universe")] = ValveKeyValueNode(signed: universe.rawValue)
-		vdf[ValveKeyValueNode("name")] = ValveKeyValueNode(name)
-		vdf[ValveKeyValueNode("stateFlags")] = ValveKeyValueNode(unsigned: stateFlags.rawValue)
-		vdf[ValveKeyValueNode("installdir")] = ValveKeyValueNode(installDir)
-		vdf[ValveKeyValueNode("LastUpdated")] = ValveKeyValueNode(unsigned: UInt(lastUpdated.timeIntervalSince1970))
-		vdf[ValveKeyValueNode("LastPlayed")] = ValveKeyValueNode(unsigned: UInt(lastPlayed.timeIntervalSince1970))
-		vdf[ValveKeyValueNode("SizeOnDisk")] = ValveKeyValueNode(unsigned: sizeOnDisk)
-		vdf[ValveKeyValueNode("StagingSize")] = ValveKeyValueNode(unsigned: stagingSize)
-		vdf[ValveKeyValueNode("buildid")] = ValveKeyValueNode(unsigned: buildID)
-		vdf[ValveKeyValueNode("LastOwner")] = ValveKeyValueNode(unsigned: lastOwner.rawValue)
-		vdf[ValveKeyValueNode("UpdateResult")] = ValveKeyValueNode(unsigned: updateResult.rawValue)
-		vdf[ValveKeyValueNode("BytesToDownload")] = ValveKeyValueNode(unsigned: bytesToDownload)
-		vdf[ValveKeyValueNode("BytesDownloaded")] = ValveKeyValueNode(unsigned: bytesDownloaded)
-		vdf[ValveKeyValueNode("BytesToStage")] = ValveKeyValueNode(unsigned: bytesToStage)
-		vdf[ValveKeyValueNode("BytesStaged")] = ValveKeyValueNode(unsigned: bytesStaged)
-		vdf[ValveKeyValueNode("TargetBuildID")] = ValveKeyValueNode(unsigned: targetBuildID)
-		vdf[ValveKeyValueNode("AutoUpdateBehavior")] = ValveKeyValueNode(unsigned: autoUpdateBehavior.rawValue)
-		vdf[ValveKeyValueNode("AllowOtherDownloadsWhileRunning")] = ValveKeyValueNode(unsigned: allowOtherDownloadsWhileRunning.rawValue)
-		vdf[ValveKeyValueNode("ScheduledAutoUpdate")] = ValveKeyValueNode(unsigned: UInt(scheduledAutoUpdate.timeIntervalSince1970))
+		vdf["appid"] = ValveKeyValueNode(unsigned: appId)
+		vdf["universe"] = ValveKeyValueNode(signed: universe.rawValue)
+		vdf["name"] = ValveKeyValueNode(name)
+		vdf["stateFlags"] = ValveKeyValueNode(unsigned: stateFlags.rawValue)
+		vdf["installdir"] = ValveKeyValueNode(installDir)
+		vdf["LastUpdated"] = ValveKeyValueNode(unsigned: UInt(lastUpdated.timeIntervalSince1970))
+		vdf["LastPlayed"] = ValveKeyValueNode(unsigned: UInt(lastPlayed.timeIntervalSince1970))
+		vdf["SizeOnDisk"] = ValveKeyValueNode(unsigned: sizeOnDisk)
+		vdf["StagingSize"] = ValveKeyValueNode(unsigned: stagingSize)
+		vdf["buildid"] = ValveKeyValueNode(unsigned: buildID)
+		vdf["LastOwner"] = ValveKeyValueNode(unsigned: lastOwner.rawValue)
+		vdf["UpdateResult"] = ValveKeyValueNode(unsigned: updateResult.rawValue)
+		vdf["BytesToDownload"] = ValveKeyValueNode(unsigned: bytesToDownload)
+		vdf["BytesDownloaded"] = ValveKeyValueNode(unsigned: bytesDownloaded)
+		vdf["BytesToStage"] = ValveKeyValueNode(unsigned: bytesToStage)
+		vdf["BytesStaged"] = ValveKeyValueNode(unsigned: bytesStaged)
+		vdf["TargetBuildID"] = ValveKeyValueNode(unsigned: targetBuildID)
+		vdf["AutoUpdateBehavior"] = ValveKeyValueNode(unsigned: autoUpdateBehavior.rawValue)
+		vdf["AllowOtherDownloadsWhileRunning"] = ValveKeyValueNode(unsigned: allowOtherDownloadsWhileRunning.rawValue)
+		vdf["ScheduledAutoUpdate"] = ValveKeyValueNode(unsigned: UInt(scheduledAutoUpdate.timeIntervalSince1970))
 
 		if let stagingFolder = stagingFolder {
-			vdf[ValveKeyValueNode("StagingFolder")] = ValveKeyValueNode(signed: stagingFolder)
+			vdf["StagingFolder"] = ValveKeyValueNode(signed: stagingFolder)
 		}
 
-		vdf.append(ValveKeyValue(key: ValveKeyValueNode("InstalledDepots"), map: installedDepots))
+		vdf.append(ValveKeyValue(key: "InstalledDepots", map: installedDepots))
 
 		if !self.installScripts.isEmpty {
-			vdf.append(ValveKeyValue(key: ValveKeyValueNode("InstallScripts"), map: installScripts))
+			vdf.append(ValveKeyValue(key: "InstallScripts", map: installScripts))
 		}
 
 		if !self.sharedDepots.isEmpty {
-			vdf.append(ValveKeyValue(key: ValveKeyValueNode("SharedDepots"), map: sharedDepots))
+			vdf.append(ValveKeyValue(key: "SharedDepots", map: sharedDepots))
 		}
 
-		vdf.append(ValveKeyValue(key: ValveKeyValueNode("UserConfig"), map: userConfig))
-		vdf.append(ValveKeyValue(key: ValveKeyValueNode("MountedConfig"), map: mountedConfig))
+		vdf.append(ValveKeyValue(key: "UserConfig", map: userConfig))
+		vdf.append(ValveKeyValue(key: "MountedConfig", map: mountedConfig))
 
 		return vdf
 	}
