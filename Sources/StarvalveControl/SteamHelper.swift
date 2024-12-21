@@ -7,6 +7,12 @@ import Foundation
 	import WinSDK
 #endif
 
+#if os(Linux) || os(Windows)
+	private typealias FileBool = Bool
+#else
+	private typealias FileBool = ObjCBool
+#endif
+
 struct SteamHelper {
 	let steamPath: String
 
@@ -17,7 +23,7 @@ struct SteamHelper {
 
 		self.steamPath = steamPath
 
-		var isDirectory: Bool = false
+		var isDirectory: FileBool = false
 		guard FileManager.default.fileExists(atPath: self.steamPath, isDirectory: &isDirectory) && isDirectory else {
 			preconditionFailure("Path \"\(self.steamPath)\" does not exist")
 		}
