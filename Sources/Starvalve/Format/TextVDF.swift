@@ -111,11 +111,19 @@ class TextVDFLexer {
 public struct TextVDF {
 	@available(*, unavailable) private init() {}
 
-	public static func read(string: any StringProtocol) throws -> ValveKeyValue? {
+	public static func read(url: URL) throws -> ValveKeyValue? {
+		guard let data = try? String(contentsOf: url, encoding: .utf8) else {
+			return nil
+		}
+
+		return try read(string: data)
+	}
+
+	public static func read(string: String) throws -> ValveKeyValue? {
 		var memo: [ValveKeyValue] = []
 		var current: ValveKeyValue?
 		var key: ValveKeyValueNode?
-		let lexer = TextVDFLexer(String(string))
+		let lexer = TextVDFLexer(string)
 
 		while let token = try lexer.next() {
 			switch token {

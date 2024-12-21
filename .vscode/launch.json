@@ -3,7 +3,7 @@
 		{
 			"type": "swift-lldb",
 			"request": "launch",
-			"args": [],
+			"args": ["library", "list"],
 			"cwd": "${workspaceFolder:Starvalve}",
 			"name": "Debug starvalvectl",
 			"program": "${workspaceFolder:Starvalve}/.build/debug/starvalvectl",

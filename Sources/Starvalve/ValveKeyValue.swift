@@ -3,13 +3,20 @@
 
 /// Node value structure for VDF elements.
 public struct ValveKeyValueNode: VDFInitializable, ExpressibleByStringLiteral {
-	public let value: (any StringProtocol)?
+	public let value: String?
+
+	public var description: String {
+		guard let value = value else {
+			return "nil"
+		}
+		return value
+	}
 
 	public init() {
 		self.value = nil
 	}
 
-	public init(_ string: any StringProtocol) {
+	public init(_ string: String) {
 		self.value = string
 	}
 
@@ -315,7 +322,7 @@ public class ValveKeyValue: Sequence, VDFContent {
 		return self
 	}
 
-	public func firstIndex(key name: (any StringProtocol)) -> Int? {
+	public func firstIndex(key name: String) -> Int? {
 		let lowercased = name.lowercased()
 		return children.firstIndex { kv in
 			guard let key = kv.key.string else {
@@ -333,7 +340,7 @@ public class ValveKeyValue: Sequence, VDFContent {
 		return firstIndex(key: key)
 	}
 
-	public func lastIndex(key name: any StringProtocol) -> Int? {
+	public func lastIndex(key name: String) -> Int? {
 		let lowercased = name.lowercased()
 		return children.lastIndex { kv in
 			guard let key = kv.key.string else {
@@ -444,7 +451,7 @@ public class ValveKeyValue: Sequence, VDFContent {
 		return result
 	}
 
-	subscript(index: Int) -> ValveKeyValue? {
+	public subscript(index: Int) -> ValveKeyValue? {
 		get {
 			guard index >= 0 && index < children.count else {
 				return nil
@@ -466,7 +473,7 @@ public class ValveKeyValue: Sequence, VDFContent {
 		}
 	}
 
-	subscript(name: String) -> ValveKeyValue? {
+	public subscript(name: String) -> ValveKeyValue? {
 		guard let index = firstIndex(key: name) else {
 			return nil
 		}
@@ -474,7 +481,7 @@ public class ValveKeyValue: Sequence, VDFContent {
 		return children[index]
 	}
 
-	subscript(key: ValveKeyValueNode) -> ValveKeyValueNode? {
+	public subscript(key: ValveKeyValueNode) -> ValveKeyValueNode? {
 		get {
 			guard let index = firstIndex(key: key) else {
 				return nil

@@ -4,7 +4,12 @@
 import ArgumentParser
 import Starvalve
 
-struct List: ParsableCommand {
+struct ListAppsCommand: ParsableCommand {
+	static let configuration = CommandConfiguration(
+		commandName: "list",
+		abstract: "Lists installed Steam apps"
+	)
+
 	@OptionGroup var globals: GlobalOptions
 
 	mutating func run() {

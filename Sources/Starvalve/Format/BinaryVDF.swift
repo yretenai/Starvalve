@@ -93,13 +93,21 @@ class BinaryVDFReader {
 public struct BinaryVDF {
 	@available(*, unavailable) private init() {}
 
-	static func read(key: ValveKeyValueNode, data: DataCursor, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
-		let reader = try BinaryVDFReader(data: data, stringTable: stringTable)
-		return try reader.readObject(key: key)
+	public static func read(url: URL, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
+		guard let data = try? Data(contentsOf: url) else {
+			return nil
+		}
+
+		return try read(data: data, stringTable: stringTable)
 	}
 
-	public static func read(key: ValveKeyValueNode, data: Data, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
+	static func read(data: DataCursor, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
+		let reader = try BinaryVDFReader(data: data, stringTable: stringTable)
+		return try reader.readObject(key: ValveKeyValueNode()).children.first
+	}
+
+	public static func read(data: Data, stringTable: [ValveKeyValueNode]? = nil) throws -> ValveKeyValue? {
 		let reader = try BinaryVDFReader(data: DataCursor(data), stringTable: stringTable)
-		return try reader.readObject(key: key)
+		return try reader.readObject(key: ValveKeyValueNode()).children.first
 	}
 }

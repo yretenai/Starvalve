@@ -25,7 +25,7 @@ public struct SteamPackageData {
 			contentId = 0
 		}
 
-		guard let vdf = try BinaryVDF.read(key: "PackageInfo", data: data) else {
+		guard let vdf = try BinaryVDF.read(data: data) else {
 			throw SteamAppInfoError.invalidVdf
 		}
 		self.vdf = vdf
