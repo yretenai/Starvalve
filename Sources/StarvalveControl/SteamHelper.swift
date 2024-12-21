@@ -26,8 +26,10 @@ struct SteamHelper {
 			let home = FileManager.default.homeDirectoryForCurrentUser
 			return home.appending(path: ".steam/root", directoryHint: .isDirectory).path()
 		#elseif os(macOS)
-			let home = FileManager.default.homeDirectoryForCurrentUser
-			return home.appending(path: "Library/Application Support/Steam", directoryHint: .isDirectory).path()
+			guard let applicationSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+				return nil
+			}
+			return applicationSupport.appending(path: "Steam", directoryHint: .isDirectory).path()
 		#elseif os(Windows)
 			#if canImport(WinSDK)
 				if let path = SteamHelper.findSteamViaRegistry() {
