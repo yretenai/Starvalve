@@ -54,9 +54,9 @@ struct ListLibrariesCommand: ParsableCommand {
 			}
 
 			print("content id: \(library.contentID, color: .magenta)")
-			print("storage size: \(library.totalSize.formatted(.byteCount(style: .binary)), color: .yellow)")
-			print("size: \(library.appSize.formatted(.byteCount(style: .binary)), color: .yellow)")
-			print("update: \(library.updateCleanBytesTally.formatted(.byteCount(style: .binary)), color: .yellow)")
+			print("storage size: \(library.totalSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+			print("size: \(library.appSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+			print("update: \(library.updateCleanBytesTally.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 			print("verification time: \(library.timeLastUpdateVerified.nowOrNever, color: library.timeLastUpdateVerified.timeIntervalSince1970 == 0 ? .red : .green)")
 			print("corruption time: \(library.timeLastUpdateCorrpution.nowOrNever, color: library.timeLastUpdateCorrpution.timeIntervalSince1970 == 0 ? .green : .red)")
 			if detailed {
@@ -67,16 +67,16 @@ struct ListLibrariesCommand: ParsableCommand {
 					let appName = appNameMap[appId] ?? "SteamApp\(appId)"
 					print("\tapp \(appName, color: .green)")
 					print("\tid: \(appId, color: .magenta)")
-					print("\tsize: \(appSize.formatted(.byteCount(style: .binary)), color: .yellow)")
+					print("\tsize: \(appSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 					if let appInfo = AppInfo(libraryPath: library.path, appId: appId) {
 						if let workshop = appInfo.workshop, workshop.sizeOnDisk > 0 {
-							print("\tworkshop: \(workshop.sizeOnDisk.formatted(.byteCount(style: .binary)), color: .yellow)")
+							print("\tworkshop: \(workshop.sizeOnDisk.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 						}
 						if appInfo.compatDataSize > 0 {
-							print("\tcompatdata: \(appInfo.compatDataSize.formatted(.byteCount(style: .binary)), color: .yellow)")
+							print("\tcompatdata: \(appInfo.compatDataSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 						}
 						if appInfo.shaderCacheSize > 0 {
-							print("\tshadercache: \(appInfo.shaderCacheSize.formatted(.byteCount(style: .binary)), color: .yellow)")
+							print("\tshadercache: \(appInfo.shaderCacheSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 						}
 					} else {
 						print("\t⚠️ \("MISSING ACF", color: .red)")
