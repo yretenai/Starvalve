@@ -5,18 +5,18 @@
 			"request": "launch",
 			"args": [],
 			"cwd": "${workspaceFolder:Starvalve}",
-			"name": "Debug StarvalveControl",
-			"program": "${workspaceFolder:Starvalve}/.build/debug/StarvalveControl",
-			"preLaunchTask": "swift: Build Debug StarvalveControl"
+			"name": "Debug starvalvectl",
+			"program": "${workspaceFolder:Starvalve}/.build/debug/starvalvectl",
+			"preLaunchTask": "swift: Build Debug starvalvectl"
 		},
 		{
 			"type": "swift-lldb",
 			"request": "launch",
 			"args": [],
 			"cwd": "${workspaceFolder:Starvalve}",
-			"name": "Release StarvalveControl",
-			"program": "${workspaceFolder:Starvalve}/.build/release/StarvalveControl",
-			"preLaunchTask": "swift: Build Release StarvalveControl"
+			"name": "Release starvalvectl",
+			"program": "${workspaceFolder:Starvalve}/.build/release/starvalvectl",
+			"preLaunchTask": "swift: Build Release starvalvectl"
 		}
 	]
 }

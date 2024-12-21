@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 import ArgumentParser
-import Starvalve
 
 @main
 struct StarvalveControl: ParsableCommand {
-	mutating func run() throws {
-		print("Hello, world!")
-	}
+	static let configuration = CommandConfiguration(
+		abstract: "A utility for manipulating Steam installations.",
+		subcommands: [List.self],
+		defaultSubcommand: List.self
+	)
 }

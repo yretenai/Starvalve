@@ -19,11 +19,12 @@ let package = Package(
 		.target(
 			name: "Starvalve"),
 		.executableTarget(
-			name: "StarvalveControl",
+			name: "starvalvectl",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"Starvalve",
-			]
+			],
+			path: "Sources/StarvalveControl"
 		),
 		.testTarget(
 			name: "StarvalveTests",
