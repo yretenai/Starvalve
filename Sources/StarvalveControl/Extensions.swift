@@ -77,38 +77,6 @@ extension DefaultStringInterpolation {
 	}
 }
 
-extension UInt {
-	private static let suffixes: [ByteFormatting: [String]] = [
-		.baseTen: ["bytes", "kb", "mb", "gb", "tb", "pb", "eb", "zb", "yb"],
-		.powerOfTwo: ["bytes", "kib", "mib", "gib", "tib", "pib", "eib", "zib", "yib"],
-	]
-
-	func formatted(byteBase format: ByteFormatting) -> String {
-		if self == 0 {
-			return "empty"
-		}
-
-		let base = Double(format.rawValue)
-		let bytes = Double(self)
-
-		let index = floor(log(bytes) / log(base))
-
-		let numberFormatter = NumberFormatter()
-		numberFormatter.maximumFractionDigits = 2
-		numberFormatter.numberStyle = .decimal
-
-		guard let string = numberFormatter.string(from: NSNumber(value: bytes / pow(base, index))) else {
-			return String(self, radix: 10)
-		}
-
-		guard let suffix = UInt.suffixes[format]?[Int(index)] else {
-			return String(self, radix: 10)
-		}
-
-		return "\(string) \(suffix)"
-	}
-}
-
 extension Date {
 	var nowOrNever: String {
 		if self.timeIntervalSince1970 == 0 {
