@@ -272,17 +272,20 @@ extension Float16: VDFInitializable {
 	}
 }
 
-extension Float80: VDFInitializable {
-	/// initialize this type via a VDF key value element.
-	public init?(vdfValue: ValveKeyValueNode) {
-		guard let double = vdfValue.double else {
-			return nil
+// unavailable on apple silicon
+#if os(Linux) || os(Windows)
+	extension Float80: VDFInitializable {
+		/// initialize this type via a VDF key value element.
+		public init?(vdfValue: ValveKeyValueNode) {
+			guard let double = vdfValue.double else {
+				return nil
+			}
+			self = Float80(double)
 		}
-		self = Float80(double)
-	}
 
-	/// convert this type to a VDF key value element.
-	public func vdf() -> ValveKeyValueNode {
-		return ValveKeyValueNode(double: Double(self))
+		/// convert this type to a VDF key value element.
+		public func vdf() -> ValveKeyValueNode {
+			return ValveKeyValueNode(double: Double(self))
+		}
 	}
-}
+#endif
