@@ -197,35 +197,37 @@ extension UInt64: VDFInitializable {
 	}
 }
 
-extension Int128: VDFInitializable {
-	/// initialize this type via a VDF key value element.
-	public init?(vdfValue: ValveKeyValueNode) {
-		guard let signed = vdfValue.signed else {
-			return nil
+#if !os(macOS)
+	extension Int128: VDFInitializable {
+		/// initialize this type via a VDF key value element.
+		public init?(vdfValue: ValveKeyValueNode) {
+			guard let signed = vdfValue.signed else {
+				return nil
+			}
+			self = Int128(signed)
 		}
-		self = Int128(signed)
-	}
 
-	/// convert this type to a VDF key value element.
-	public func vdf() -> ValveKeyValueNode {
-		return ValveKeyValueNode(String(self))
-	}
-}
-
-extension UInt128: VDFInitializable {
-	/// initialize this type via a VDF key value element.
-	public init?(vdfValue: ValveKeyValueNode) {
-		guard let unsigned = vdfValue.unsigned else {
-			return nil
+		/// convert this type to a VDF key value element.
+		public func vdf() -> ValveKeyValueNode {
+			return ValveKeyValueNode(String(self))
 		}
-		self = UInt128(unsigned)
 	}
 
-	/// convert this type to a VDF key value element.
-	public func vdf() -> ValveKeyValueNode {
-		return ValveKeyValueNode(String(self))
+	extension UInt128: VDFInitializable {
+		/// initialize this type via a VDF key value element.
+		public init?(vdfValue: ValveKeyValueNode) {
+			guard let unsigned = vdfValue.unsigned else {
+				return nil
+			}
+			self = UInt128(unsigned)
+		}
+
+		/// convert this type to a VDF key value element.
+		public func vdf() -> ValveKeyValueNode {
+			return ValveKeyValueNode(String(self))
+		}
 	}
-}
+#endif
 
 extension Double: VDFInitializable {
 	/// initialize this type via a VDF key value element.
@@ -273,7 +275,7 @@ extension Float16: VDFInitializable {
 }
 
 // unavailable on apple silicon
-#if os(Linux) || os(Windows)
+#if !os(macOS)
 	extension Float80: VDFInitializable {
 		/// initialize this type via a VDF key value element.
 		public init?(vdfValue: ValveKeyValueNode) {

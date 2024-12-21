@@ -6,7 +6,7 @@ import PackageDescription
 
 let package = Package(
 	name: "Starvalve",
-	platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .watchOS(.v11), .macCatalyst(.v18)],
+	platforms: [.macOS(.v13)],
 	products: [
 		.library(
 			name: "Starvalve",
