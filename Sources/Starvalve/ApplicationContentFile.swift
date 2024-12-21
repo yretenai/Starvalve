@@ -99,7 +99,7 @@ public struct ApplicationContentFile: VDFContent {
 	public var autoUpdateBehavior: ACFAutoUpdateBehavior = .automatic
 	public var allowOtherDownloadsWhileRunning: ACFBackgroundUpdateBehavior = .deferToGlobalSetting
 	public var scheduledAutoUpdate: Date = Date(timeIntervalSince1970: TimeInterval(0))
-	public var stagingFolder: Int?
+	public var stagingFolder: Int?  // index of library folder in libraryfolders.vdf
 	public var installedDepots: [UInt: ACFInstalledApplicationDepot] = [:]
 	public var sharedDepots: [UInt: UInt] = [:]
 	public var installScripts: [UInt: String] = [:]
@@ -140,6 +140,7 @@ public struct ApplicationContentFile: VDFContent {
 		stagingFolder = vdf["StagingFolder"]?.signed
 		installedDepots = vdf["InstalledDepots"]?.to(key: UInt.self, value: ACFInstalledApplicationDepot.self) ?? [:]
 		installScripts = vdf["InstallScripts"]?.to(key: UInt.self, value: String.self) ?? [:]
+		sharedDepots = vdf["SharedDepots"]?.to(key: UInt.self, value: UInt.self) ?? [:]
 		userConfig = vdf["UserConfig"]?.to(key: String.self, value: ValveKeyValue.self) ?? [:]
 		mountedConfig = vdf["MountedConfig"]?.to(key: String.self, value: ValveKeyValue.self) ?? [:]
 	}
@@ -179,7 +180,7 @@ public struct ApplicationContentFile: VDFContent {
 		}
 
 		if !self.sharedDepots.isEmpty {
-			vdf.append(ValveKeyValue(key: ValveKeyValueNode("InstallScripts"), map: sharedDepots))
+			vdf.append(ValveKeyValue(key: ValveKeyValueNode("SharedDepots"), map: sharedDepots))
 		}
 
 		vdf.append(ValveKeyValue(key: ValveKeyValueNode("UserConfig"), map: userConfig))
