@@ -9,15 +9,15 @@ SPDX-License-Identifier: EUPL-1.2
 - [x] binary vdf
 - [x] appconfig vdf
 - [ ] `clean` command (remove leftover files and linux-specific cache files from game directories)
-- [ ] `uninstall` command (uninstall a game without running uninstall scripts)
-- [ ] `args` command (edit game launch arguments)
-- [ ] `move` command (move game from one library to another)
+- [ ] `uninstall [appid/name...]` command (uninstall a game without running uninstall scripts)
+- [ ] `args <appid/name> <args>` command (edit game launch arguments)
+- [ ] `move <appid/name> <library/label>` command (move game from one library to another)
 - [ ] `list` command (list installed games)
-- [ ] `library` command (list libraries)
-- [ ] `library set-label` command (set library label)
-- [ ] `library purge` command (delete an entire library)
-- [ ] `staging` command (list all games that have other libraries as staging directories)
-- [ ] `staging set` command (manage the staging library for a given game)
+- [ ] `library list` command (list libraries)
+- [ ] `library label <library/label> <label>` command (set library label)
+- [ ] `library purge <library/label` command (delete an entire library)
+- [ ] `staging list` command (list all games that have other libraries as staging directories)
+- [ ] `staging set <appid/name> <library/label>` command (manage the staging library for a given game)
 - [ ] write more tests (mock binary vdf files?)
 - [ ] write better docs
 - [ ] generate docc
