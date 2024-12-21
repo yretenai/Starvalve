@@ -7,10 +7,10 @@ import Foundation
 	import WinSDK
 #endif
 
-#if os(Linux) || os(Windows)
-	private typealias FileBool = Bool
-#else
+#if os(macOS)
 	private typealias FileBool = ObjCBool
+#else
+	private typealias FileBool = Bool
 #endif
 
 struct SteamHelper {
@@ -24,9 +24,19 @@ struct SteamHelper {
 		self.steamPath = steamPath
 
 		var isDirectory: FileBool = false
-		guard FileManager.default.fileExists(atPath: self.steamPath, isDirectory: &isDirectory) && isDirectory else {
+		guard FileManager.default.fileExists(atPath: self.steamPath, isDirectory: &isDirectory) else {
 			preconditionFailure("Path \"\(self.steamPath)\" does not exist")
 		}
+
+		#if os(macOS)
+			guard isDirectory.boolValue else {
+				preconditionFailure("Path \"\(self.steamPath)\" is not a directory")
+			}
+		#else
+			guard isDirectory else {
+				preconditionFailure("Path \"\(self.steamPath)\" is not a directory")
+			}
+		#endif
 	}
 
 	static func findSteam() -> String? {
