@@ -158,7 +158,7 @@ let acfSample = """
 
 @Test func acfTest() throws {
 	let vdf = try #require(try TextVDF.read(string: acfSample))
-	let acf = try #require(ApplicationContentFile.init(vdf))
+	let acf = try #require(ApplicationContentFile.init(vdf: vdf))
 
 	#expect(acf.appId == 220)
 	#expect(acf.universe == .steam)
