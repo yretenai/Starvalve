@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 /// Node value structure for VDF elements.
-public struct ValveKeyValueNode {
+public struct ValveKeyValueNode: VDFInitializable {
 	public let value: (any StringProtocol)?
 
 	public init() {
@@ -31,6 +31,10 @@ public struct ValveKeyValueNode {
 
 	public init(bool: Bool) {
 		self.value = bool ? "1" : "0"
+	}
+
+	public init(vdfValue: ValveKeyValueNode) {
+		self = vdfValue
 	}
 
 	public var isNil: Bool {
@@ -104,10 +108,14 @@ public struct ValveKeyValueNode {
 
 		return value == 1
 	}
+
+	public func vdf() -> ValveKeyValueNode {
+		return self
+	}
 }
 
 /// An element for VDF structures.
-public class ValveKeyValue: Sequence {
+public class ValveKeyValue: Sequence, VDFContent {
 	public typealias Element = ValveKeyValue
 	public typealias Iterator = [ValveKeyValue].Iterator
 
@@ -139,6 +147,82 @@ public class ValveKeyValue: Sequence {
 		self.key = key
 		self.value = ValveKeyValueNode()
 		self.children = children
+	}
+
+	public required init(vdf: ValveKeyValue) {
+		self.key = vdf.key
+		self.value = vdf.value
+		self.children = [ValveKeyValue](vdf.children)
+	}
+
+	public init(key: ValveKeyValueNode, vdf: VDFInitializable) {
+		self.key = key
+		self.value = vdf.vdf()
+		self.children = []
+	}
+
+	public init(key: ValveKeyValueNode, vdf: VDFContent) {
+		self.key = key
+		let nested = vdf.vdf()
+		self.value = nested.value
+		self.children = [ValveKeyValue](nested.children)
+	}
+
+	public init(key: VDFInitializable, vdf: VDFInitializable) {
+		self.key = key.vdf()
+		self.value = vdf.vdf()
+		self.children = []
+	}
+
+	public init(key: VDFInitializable, vdf: VDFContent) {
+		self.key = key.vdf()
+		let nested = vdf.vdf()
+		self.value = nested.value
+		self.children = [ValveKeyValue](nested.children)
+	}
+
+	public init(key: ValveKeyValueNode, vdf: ValveKeyValue) {
+		self.key = key
+		self.value = vdf.value
+		self.children = [ValveKeyValue](vdf.children)
+	}
+
+	public init<T: VDFContent>(key: ValveKeyValueNode, sequence: [T]) {
+		self.key = key
+		self.value = ValveKeyValueNode()
+		var index = 0
+		self.children = sequence.compactMap { vdf in
+			let result = ValveKeyValue(key: ValveKeyValueNode(signed: index), vdf: vdf)
+			index += 1
+			return result
+		}
+	}
+
+	public init<T: VDFInitializable>(key: ValveKeyValueNode, sequence: [T]) {
+		self.key = key
+		self.value = ValveKeyValueNode()
+		var index = 0
+		self.children = sequence.compactMap { vdf in
+			let result = ValveKeyValue(key: ValveKeyValueNode(signed: index), vdf: vdf)
+			index += 1
+			return result
+		}
+	}
+
+	public init<TKey: VDFInitializable, TValue: VDFContent>(key: ValveKeyValueNode, map: [TKey: TValue]) {
+		self.key = key
+		self.value = ValveKeyValueNode()
+		self.children = map.compactMap { (key, value) in
+			ValveKeyValue(key: key, vdf: value)
+		}
+	}
+
+	public init<TKey: VDFInitializable, TValue: VDFInitializable>(key: ValveKeyValueNode, map: [TKey: TValue]) {
+		self.key = key
+		self.value = ValveKeyValueNode()
+		self.children = map.compactMap { (key, value) in
+			ValveKeyValue(key: key, vdf: value)
+		}
 	}
 
 	public var isNil: Bool {
@@ -223,6 +307,10 @@ public class ValveKeyValue: Sequence {
 		}
 	}
 
+	public func vdf() -> ValveKeyValue {
+		return self
+	}
+
 	public func firstIndex(key name: (any StringProtocol)) -> Int? {
 		let lowercased = name.lowercased()
 		return children.firstIndex { kv in
@@ -294,6 +382,62 @@ public class ValveKeyValue: Sequence {
 
 	public func makeIterator() -> Iterator {
 		return children.makeIterator()
+	}
+
+	public func to<T: VDFContent>(as type: T.Type) -> T? {
+		return type.init(vdf: self)
+	}
+
+	public func to<T: VDFInitializable>(as type: T.Type) -> T? {
+		return type.init(vdfValue: value)
+	}
+
+	public func to<T: VDFContent>(sequence type: T.Type) -> [T] {
+		return makeIterator().compactMap { kv in
+			type.init(vdf: kv)
+		}
+	}
+
+	public func to<T: VDFInitializable>(sequence type: T.Type) -> [T] {
+		return makeIterator().compactMap { kv in
+			type.init(vdfValue: kv.value)
+		}
+	}
+
+	public func to<TKey: VDFInitializable, TValue: VDFContent>(key keyType: TKey.Type, value valueType: TValue.Type) -> [TKey: TValue] {
+		var result: [TKey: TValue] = [:]
+
+		for element in makeIterator() {
+			guard let key = TKey.init(vdfValue: element.key) else {
+				continue
+			}
+
+			guard let value = TValue.init(vdf: element) else {
+				continue
+			}
+
+			result[key] = value
+		}
+
+		return result
+	}
+
+	public func to<TKey: VDFInitializable, TValue: VDFInitializable>(key keyType: TKey.Type, value valueType: TValue.Type) -> [TKey: TValue] {
+		var result: [TKey: TValue] = [:]
+
+		for element in makeIterator() {
+			guard let key = TKey.init(vdfValue: element.key) else {
+				continue
+			}
+
+			guard let value = TValue.init(vdfValue: element.value) else {
+				continue
+			}
+
+			result[key] = value
+		}
+
+		return result
 	}
 
 	subscript(index: Int) -> ValveKeyValue? {

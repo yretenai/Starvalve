@@ -52,21 +52,24 @@ public enum ACFBackgroundUpdateBehavior: UInt {
 }
 
 /// An installed depot with it's manifest and size.
-public struct ACFInstalledApplicationDepot {
+public struct ACFInstalledApplicationDepot: VDFContent {
+	public let depotId: UInt
 	public var manifest: UInt
 	public var size: UInt
 
-	public init(manifest: UInt, size: UInt) {
+	public init(depotId: UInt, manifest: UInt, size: UInt) {
+		self.depotId = depotId
 		self.manifest = manifest
 		self.size = size
 	}
 
-	public init?(_ kv: ValveKeyValue) {
-		manifest = kv["Manifest"]?.unsigned ?? 0
-		size = kv["Size"]?.unsigned ?? 0
+	public init?(vdf: ValveKeyValue) {
+		depotId = vdf.key.unsigned ?? 0
+		manifest = vdf["Manifest"]?.unsigned ?? 0
+		size = vdf["Size"]?.unsigned ?? 0
 	}
 
-	public func vdf(_ depotId: UInt) -> ValveKeyValue {
+	public func vdf() -> ValveKeyValue {
 		let vdf = ValveKeyValue(ValveKeyValueNode(unsigned: depotId))
 		vdf[ValveKeyValueNode("manifest")] = ValveKeyValueNode(unsigned: manifest)
 		vdf[ValveKeyValueNode("size")] = ValveKeyValueNode(unsigned: size)
@@ -75,7 +78,7 @@ public struct ACFInstalledApplicationDepot {
 }
 
 /// ACF file format structure.
-public struct ApplicationContentFile {
+public struct ApplicationContentFile: VDFContent {
 	public var appId: UInt
 	public var universe: SteamUniverse = .steam
 	public var name: String
@@ -109,90 +112,36 @@ public struct ApplicationContentFile {
 		self.installDir = installDir ?? name
 	}
 
-	public init?(_ kv: ValveKeyValue) {
-		guard let appId = kv["AppId"]?.unsigned else {
+	public init?(vdf: ValveKeyValue) {
+		guard let appId = vdf["AppId"]?.unsigned else {
 			return nil
 		}
 
 		self.appId = appId
-		universe = SteamUniverse(rawValue: kv["universe"]?.signed ?? 0) ?? .invalid
-		name = String(describing: kv["Name"]?.string ?? "SteamApp\(appId)")
-		stateFlags = ACFAppState(rawValue: kv["StateFlags"]?.unsigned ?? 0)
-		installDir = String(describing: kv["InstallDir"]?.string ?? "SteamApp")
-		lastUpdated = Date(timeIntervalSince1970: TimeInterval(kv["LastUpdated"]?.unsigned ?? 0))
-		lastPlayed = Date(timeIntervalSince1970: TimeInterval(kv["LastPlayed"]?.unsigned ?? 0))
-		sizeOnDisk = kv["SizeOnDisk"]?.unsigned ?? 0
-		stagingSize = kv["StagingSize"]?.unsigned ?? 0
-		buildID = kv["BuildID"]?.unsigned ?? 0
-		lastOwner = SteamID(kv["LastOwner"]?.unsigned ?? 0)
-		updateResult = ACFUpdateResult(rawValue: kv["UpdateResult"]?.unsigned ?? 0) ?? .success
-		bytesToDownload = kv["BytesToDownload"]?.unsigned ?? 0
-		bytesDownloaded = kv["BytesDownloaded"]?.unsigned ?? 0
-		bytesToStage = kv["BytesToStage"]?.unsigned ?? 0
-		bytesStaged = kv["BytesStaged"]?.unsigned ?? 0
-		targetBuildID = kv["TargetBuildID"]?.unsigned ?? 0
-		autoUpdateBehavior = ACFAutoUpdateBehavior(rawValue: kv["AutoUpdateBehavior"]?.unsigned ?? 0) ?? .automatic
-		allowOtherDownloadsWhileRunning = ACFBackgroundUpdateBehavior(rawValue: kv["AllowOtherDownloadsWhileRunning"]?.unsigned ?? 0) ?? .deferToGlobalSetting
-		scheduledAutoUpdate = Date(timeIntervalSince1970: TimeInterval(kv["ScheduledAutoUpdate"]?.unsigned ?? 0))
-		stagingFolder = kv["StagingFolder"]?.signed
-
-		if let installedDepots = kv["InstalledDepots"] {
-			for child in installedDepots {
-				guard let depotId = child.key.unsigned else {
-					continue
-				}
-
-				self.installedDepots[depotId] = ACFInstalledApplicationDepot(child)
-			}
-		}
-
-		if let installScripts = kv["InstallScripts"] {
-			for child in installScripts {
-				guard let appId = child.key.unsigned else {
-					continue
-				}
-
-				guard let scriptPath = child.value.string else {
-					continue
-				}
-
-				self.installScripts[appId] = scriptPath
-			}
-		}
-
-		if let sharedDepots = kv["SharedDepots"] {
-			for child in sharedDepots {
-				guard let depotId = child.key.unsigned else {
-					continue
-				}
-
-				guard let appId = child.unsigned else {
-					continue
-				}
-
-				self.sharedDepots[depotId] = appId
-			}
-		}
-
-		if let userConfig = kv["UserConfig"] {
-			for child in userConfig {
-				guard let key = child.key.string else {
-					continue
-				}
-
-				self.userConfig[key] = child
-			}
-		}
-
-		if let mountedConfig = kv["MountedConfig"] {
-			for child in mountedConfig {
-				guard let key = child.key.string else {
-					continue
-				}
-
-				self.mountedConfig[key] = child
-			}
-		}
+		universe = SteamUniverse(rawValue: vdf["universe"]?.signed ?? 0) ?? .invalid
+		name = String(describing: vdf["Name"]?.string ?? "SteamApp\(appId)")
+		stateFlags = ACFAppState(rawValue: vdf["StateFlags"]?.unsigned ?? 0)
+		installDir = String(describing: vdf["InstallDir"]?.string ?? "SteamApp")
+		lastUpdated = Date(timeIntervalSince1970: TimeInterval(vdf["LastUpdated"]?.unsigned ?? 0))
+		lastPlayed = Date(timeIntervalSince1970: TimeInterval(vdf["LastPlayed"]?.unsigned ?? 0))
+		sizeOnDisk = vdf["SizeOnDisk"]?.unsigned ?? 0
+		stagingSize = vdf["StagingSize"]?.unsigned ?? 0
+		buildID = vdf["BuildID"]?.unsigned ?? 0
+		lastOwner = SteamID(vdf["LastOwner"]?.unsigned ?? 0)
+		updateResult = ACFUpdateResult(rawValue: vdf["UpdateResult"]?.unsigned ?? 0) ?? .success
+		bytesToDownload = vdf["BytesToDownload"]?.unsigned ?? 0
+		bytesDownloaded = vdf["BytesDownloaded"]?.unsigned ?? 0
+		bytesToStage = vdf["BytesToStage"]?.unsigned ?? 0
+		bytesStaged = vdf["BytesStaged"]?.unsigned ?? 0
+		targetBuildID = vdf["TargetBuildID"]?.unsigned ?? 0
+		autoUpdateBehavior = ACFAutoUpdateBehavior(rawValue: vdf["AutoUpdateBehavior"]?.unsigned ?? 0) ?? .automatic
+		allowOtherDownloadsWhileRunning = ACFBackgroundUpdateBehavior(rawValue: vdf["AllowOtherDownloadsWhileRunning"]?.unsigned ?? 0) ?? .deferToGlobalSetting
+		scheduledAutoUpdate = Date(timeIntervalSince1970: TimeInterval(vdf["ScheduledAutoUpdate"]?.unsigned ?? 0))
+		stagingFolder = vdf["StagingFolder"]?.signed
+		installedDepots = vdf["InstalledDepots"]?.to(key: UInt.self, value: ACFInstalledApplicationDepot.self) ?? [:]
+		installScripts = vdf["InstallScripts"]?.to(key: UInt.self, value: String.self) ?? [:]
+		userConfig = vdf["UserConfig"]?.to(key: String.self, value: ValveKeyValue.self) ?? [:]
+		mountedConfig = vdf["MountedConfig"]?.to(key: String.self, value: ValveKeyValue.self) ?? [:]
 	}
 
 	public func vdf() -> ValveKeyValue {
@@ -223,39 +172,18 @@ public struct ApplicationContentFile {
 			vdf[ValveKeyValueNode("StagingFolder")] = ValveKeyValueNode(signed: stagingFolder)
 		}
 
-		let installedDepots = ValveKeyValue(ValveKeyValueNode("InstalledDepots"))
-		for (depotId, installedDepot) in self.installedDepots {
-			installedDepots.append(installedDepot.vdf(depotId))
-		}
-		vdf.append(installedDepots)
+		vdf.append(ValveKeyValue(key: ValveKeyValueNode("InstalledDepots"), map: installedDepots))
 
 		if !self.installScripts.isEmpty {
-			let installScripts = ValveKeyValue(ValveKeyValueNode("InstallScripts"))
-			for (appId, installScript) in self.installScripts {
-				installScripts[ValveKeyValueNode(unsigned: appId)] = ValveKeyValueNode(installScript)
-			}
-			vdf.append(installScripts)
+			vdf.append(ValveKeyValue(key: ValveKeyValueNode("InstallScripts"), map: installScripts))
 		}
 
 		if !self.sharedDepots.isEmpty {
-			let sharedDepots = ValveKeyValue(ValveKeyValueNode("SharedDepots"))
-			for (depotId, appId) in self.sharedDepots {
-				sharedDepots[ValveKeyValueNode(unsigned: depotId)] = ValveKeyValueNode(unsigned: appId)
-			}
-			vdf.append(sharedDepots)
+			vdf.append(ValveKeyValue(key: ValveKeyValueNode("InstallScripts"), map: sharedDepots))
 		}
 
-		let userConfig = ValveKeyValue(ValveKeyValueNode("UserConfig"))
-		for config in self.userConfig.values {
-			userConfig.append(config)
-		}
-		vdf.append(userConfig)
-
-		let mountedConfig = ValveKeyValue(ValveKeyValueNode("MountedConfig"))
-		for config: ValveKeyValue in self.mountedConfig.values {
-			mountedConfig.append(config)
-		}
-		vdf.append(mountedConfig)
+		vdf.append(ValveKeyValue(key: ValveKeyValueNode("UserConfig"), map: userConfig))
+		vdf.append(ValveKeyValue(key: ValveKeyValueNode("MountedConfig"), map: mountedConfig))
 
 		return vdf
 	}
