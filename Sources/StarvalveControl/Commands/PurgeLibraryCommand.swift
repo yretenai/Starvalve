@@ -50,35 +50,35 @@ struct PurgeLibraryCommand: ParsableCommand {
 
 		libraries.entries.remove(at: index)
 
-		// for library in libraries.entries {
-		// 	for (appId, _) in library.apps {
-		// 		guard let appInfo = AppInfo(libraryPath: library.path, appId: appId) else {
-		// 			continue
-		// 		}
+		for library in libraries.entries {
+			for (appId, _) in library.apps {
+				guard let appInfo = AppInfo(libraryPath: library.path, appId: appId) else {
+					continue
+				}
 
-		// 		var acf = appInfo.acf
-		// 		guard var stagingIndex = acf.stagingFolder else {
-		// 			continue
-		// 		}
+				var acf = appInfo.acf
+				guard var stagingIndex = acf.stagingFolder else {
+					continue
+				}
 
-		// 		if stagingIndex == index {
-		// 			stagingIndex = selectedIndex ?? 0
-		// 			print("updated staging folder for app \(acf.name)")
-		// 		} else if stagingIndex > index {
-		// 			stagingIndex -= 1
-		// 			print("adjusted staging folder for app \(acf.name)")
-		// 		} else {
-		// 			continue
-		// 		}
+				if stagingIndex == index {
+					stagingIndex = selectedIndex ?? 0
+					print("updated staging folder for app \(acf.name)")
+				} else if stagingIndex > index {
+					stagingIndex -= 1
+					print("adjusted staging folder for app \(acf.name)")
+				} else {
+					continue
+				}
 
-		// 		acf.stagingFolder = stagingIndex
+				acf.stagingFolder = stagingIndex
 
-		// 		guard let _ = try? TextVDF.write(url: appInfo.acfPath, vdf: acf.vdf()) else {
-		// 			print("could not write file for appmanifest \(acf.name)")
-		// 			continue
-		// 		}
-		// 	}
-		// }
+				guard (try? TextVDF.write(url: appInfo.acfPath, vdf: acf.vdf())) != nil else {
+					print("could not write file for appmanifest \(acf.name)")
+					continue
+				}
+			}
+		}
 
 		// todo: delete folder if it exists?
 
