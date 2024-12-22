@@ -20,7 +20,8 @@ struct ListLibrariesCommand: ParsableCommand {
 		let steam = SteamHelper(steamPath: globals.steamPath)
 
 		guard let libraries = steam.libraryFolders else {
-			preconditionFailure("Steam libraries failed to parse.")
+			print("⚠️ Steam libraries failed to parse.")
+			return
 		}
 
 		var appNameMap: [UInt: String] = [:]

@@ -23,7 +23,13 @@ struct PurgeLibraryCommand: ParsableCommand {
 		var steam = SteamHelper(steamPath: globals.steamPath)
 
 		guard let libraries = steam.libraryFolders else {
-			preconditionFailure("Steam libraries failed to parse.")
+			print("⚠️ Steam libraries failed to parse.")
+			return
+		}
+
+		guard libraries.entries.count > 0 else {
+			print("⚠️ Need at least one additional steam library")
+			return
 		}
 
 		let target = path.canonicalPath.path
@@ -31,7 +37,8 @@ struct PurgeLibraryCommand: ParsableCommand {
 		var index: Int?
 		var selectedIndex: Int?
 
-		for libraryIndex in 0...libraries.entries.count - 1 {
+		// 0th index is the steam installation and cannot be removed
+		for libraryIndex in 1...libraries.entries.count - 1 {
 			let library = libraries.entries[libraryIndex]
 			let libraryPath = library.path.canonicalPath.path
 			if libraryPath == target && index == nil {
@@ -44,7 +51,7 @@ struct PurgeLibraryCommand: ParsableCommand {
 		}
 
 		guard let index = index else {
-			print("could not find library path \(target, color: .red)")
+			print("⚠️ could not find library path \(target, color: .red)")
 			return
 		}
 
@@ -74,7 +81,7 @@ struct PurgeLibraryCommand: ParsableCommand {
 				acf.stagingFolder = stagingIndex
 
 				guard (try? TextVDF.write(url: appInfo.acfPath, vdf: acf.vdf())) != nil else {
-					print("could not write file for appmanifest \(acf.name)")
+					print("⚠️ could not write file for appmanifest \(acf.name)")
 					continue
 				}
 			}

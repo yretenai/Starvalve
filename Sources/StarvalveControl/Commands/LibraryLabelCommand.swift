@@ -23,12 +23,13 @@ struct LibraryLabelCommand: ParsableCommand {
 		var steam = SteamHelper(steamPath: globals.steamPath)
 
 		guard let libraries = steam.libraryFolders else {
-			preconditionFailure("Steam libraries failed to parse.")
+			print("⚠️ Steam libraries failed to parse.")
+			return
 		}
 
 		let target = path.canonicalPath.path
 
-		for library in libraries.entries {
+		for library in libraries.entries[1...] {
 			if library.path.canonicalPath.path == target {
 				library.label = label ?? ""
 				try? TextVDF.write(url: library.path.appending(path: "libraryfolder.vdf", directoryHint: .notDirectory), vdf: library.singleVdf())

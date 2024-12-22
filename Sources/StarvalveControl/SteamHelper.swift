@@ -66,13 +66,14 @@ struct SteamHelper {
 			self.steamPath = URL(filePath: steamPath, directoryHint: .isDirectory).canonicalPath
 		} else {
 			guard let steamPath = SteamHelper.findSteam() else {
-				preconditionFailure("Could not locate Steam installation")
+				preconditionFailure("⚠️ Could not locate Steam installation")
 			}
+
 			self.steamPath = steamPath.canonicalPath
 		}
 
 		guard self.steamPath.isDirectory else {
-			preconditionFailure("Path \"\(self.steamPath)\" does not exist")
+			preconditionFailure("⚠️ Path \"\(self.steamPath)\" does not exist")
 		}
 	}
 
@@ -91,8 +92,10 @@ struct SteamHelper {
 			}
 
 			let path = steamPath.appending(path: "config/libraryfolders.vdf", directoryHint: .notDirectory)
+			let altPath = steamPath.appending(path: "steamapps/libraryfolders.vdf", directoryHint: .notDirectory)
 			let vdf = libraries.vdf()
 			try? TextVDF.write(url: path, vdf: vdf)
+			try? TextVDF.write(url: altPath, vdf: vdf)  // ?????
 		}
 	}
 
