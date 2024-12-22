@@ -3,7 +3,7 @@
 
 import ArgumentParser
 
-struct GlobalOptions: ParsableCommand {
+struct GlobalOptions: ParsableArguments {
 	@Option(name: .customLong("steam"), help: "Path to the steam installation")
 	var steamPath: String? = nil
 }

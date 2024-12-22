@@ -6,6 +6,7 @@ import ArgumentParser
 @main
 struct StarvalveControl: ParsableCommand {
 	static let configuration = CommandConfiguration(
+		commandName: "starvalvectl",
 		abstract: "A utility for manipulating Steam installations.",
 		subcommands: [ListAppsCommand.self, LibrariesCommand.self, StagingCommand.self],
 		defaultSubcommand: ListAppsCommand.self
