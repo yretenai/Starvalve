@@ -4,6 +4,6 @@
 import ArgumentParser
 
 struct GlobalOptions: ParsableCommand {
-	@Argument(help: "Path to the steam installation")
+	@Option(name: .customLong("steam"), help: "Path to the steam installation")
 	var steamPath: String? = nil
 }

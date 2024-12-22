@@ -8,7 +8,7 @@ struct LibrariesCommand: ParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "library",
 		abstract: "Commands relating to Steam libraries",
-		subcommands: [ListLibrariesCommand.self],
+		subcommands: [ListLibrariesCommand.self, PurgeLibraryCommand.self, LibraryLabelCommand.self],
 		defaultSubcommand: ListLibrariesCommand.self
 	)
 }

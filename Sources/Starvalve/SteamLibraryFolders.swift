@@ -4,7 +4,7 @@
 import Foundation
 
 /// A steam library folder and it's associated metadata.
-public struct SteamLibraryFolder: VDFContent {
+public class SteamLibraryFolder: VDFContent {
 	public var path: URL
 	public var label: String? = nil
 	public var contentID: UInt = 0
@@ -15,7 +15,7 @@ public struct SteamLibraryFolder: VDFContent {
 	public var timeLastUpdateVerified: Date = Date(timeIntervalSince1970: 0)
 	public var apps: [UInt: UInt] = [:]
 
-	public init?(vdf: ValveKeyValue) {
+	public required init?(vdf: ValveKeyValue) {
 		guard let path = vdf["path"]?.string else {
 			return nil
 		}
@@ -52,13 +52,20 @@ public struct SteamLibraryFolder: VDFContent {
 		vdf.append(ValveKeyValue(key: "apps", map: apps))
 		return vdf
 	}
+
+	public func singleVdf() -> ValveKeyValue {
+		let vdf = ValveKeyValue("libraryfolder")
+		vdf["contentid"] = ValveKeyValueNode(unsigned: contentID)
+		vdf["label"] = ValveKeyValueNode(label ?? "")
+		return vdf
+	}
 }
 
 /// All steam library folders.
-public struct SteamLibraryFolders: VDFContent {
+public class SteamLibraryFolders: VDFContent {
 	public var entries: [SteamLibraryFolder] = []
 
-	public init?(vdf: ValveKeyValue) {
+	public required init?(vdf: ValveKeyValue) {
 		entries = vdf.to(sequence: SteamLibraryFolder.self)
 	}
 

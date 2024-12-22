@@ -163,6 +163,14 @@ public struct TextVDF {
 		throw TextVDFError.truncated
 	}
 
+	public static func write(url: URL, vdf: ValveKeyValue) throws {
+		guard let data = try? write(vdf: vdf) else {
+			return
+		}
+
+		try data.write(to: url, atomically: true, encoding: .utf8)
+	}
+
 	public static func write(vdf: ValveKeyValue) throws -> String {
 		return try write(vdf: vdf, indent: 0)
 	}

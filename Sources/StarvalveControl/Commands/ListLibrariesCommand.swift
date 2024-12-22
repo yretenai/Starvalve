@@ -42,7 +42,7 @@ struct ListLibrariesCommand: ParsableCommand {
 			print("library \(library.path.path, color: .green)")
 
 			if let label = library.label {
-				print("label: \(label, color: .default)")
+				print("label: \(label, color: .green)")
 			} else {
 				print("label: \("<no label>", color: .red)")
 			}

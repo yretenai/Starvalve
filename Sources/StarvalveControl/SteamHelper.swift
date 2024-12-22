@@ -13,10 +13,20 @@ struct AppInfo {
 	let workshop: ApplicationContentFile?
 	let compatDataSize: UInt
 	let shaderCacheSize: UInt
+	let acfPath: URL
+	let workshopAcfPath: URL
+	let workshopPath: URL
+	let compatDataPath: URL
+	let shaderCachePath: URL
 
 	init?(libraryPath library: URL, appId: UInt) {
-		let path = library.appending(path: "steamapps/appmanifest_\(appId).acf", directoryHint: .notDirectory)
-		guard let vdf = try? TextVDF.read(url: path) else {
+		acfPath = library.appending(path: "steamapps/appmanifest_\(appId).acf", directoryHint: .notDirectory)
+		workshopAcfPath = library.appending(path: "steamapps/workshop/appworkshop_\(appId).acf", directoryHint: .notDirectory)
+		workshopPath = library.appending(path: "steamapps/workshop/content/\(appId)", directoryHint: .isDirectory)
+		compatDataPath = library.appending(path: "steamapps/compatdata/\(appId)", directoryHint: .isDirectory)
+		shaderCachePath = library.appending(path: "steamapps/shadercache/\(appId)", directoryHint: .isDirectory)
+
+		guard let vdf = try? TextVDF.read(url: acfPath) else {
 			return nil
 		}
 
@@ -26,8 +36,7 @@ struct AppInfo {
 
 		self.acf = acf
 
-		let workshopPath = library.appending(path: "steamapps/workshop/appworkshop_\(appId).acf", directoryHint: .notDirectory)
-		if let vdf = try? TextVDF.read(url: workshopPath),
+		if let vdf = try? TextVDF.read(url: workshopAcfPath),
 			let workshopAcf = ApplicationContentFile(vdf: vdf)
 		{
 			workshop = workshopAcf
@@ -35,14 +44,12 @@ struct AppInfo {
 			workshop = nil
 		}
 
-		let compatDataPath = library.appending(path: "steamapps/compatdata/\(appId)", directoryHint: .isDirectory)
 		if compatDataPath.isDirectory {
 			self.compatDataSize = (try? FileManager.default.directorySize(atPath: compatDataPath)) ?? 0
 		} else {
 			self.compatDataSize = 0
 		}
 
-		let shaderCachePath = library.appending(path: "steamapps/shadercache/\(appId)", directoryHint: .isDirectory)
 		if shaderCachePath.isDirectory {
 			self.shaderCacheSize = (try? FileManager.default.directorySize(atPath: shaderCachePath)) ?? 0
 		} else {
@@ -70,12 +77,23 @@ struct SteamHelper {
 	}
 
 	var libraryFolders: SteamLibraryFolders? {
-		let path = steamPath.appending(path: "config/libraryfolders.vdf", directoryHint: .notDirectory)
-		guard let vdf = try? TextVDF.read(url: path) else {
-			return nil
-		}
+		get {
+			let path = steamPath.appending(path: "config/libraryfolders.vdf", directoryHint: .notDirectory)
+			guard let vdf = try? TextVDF.read(url: path) else {
+				return nil
+			}
 
-		return SteamLibraryFolders(vdf: vdf)
+			return SteamLibraryFolders(vdf: vdf)
+		}
+		set {
+			guard let libraries = newValue else {
+				return
+			}
+
+			let path = steamPath.appending(path: "config/libraryfolders.vdf", directoryHint: .notDirectory)
+			let vdf = libraries.vdf()
+			try? TextVDF.write(url: path, vdf: vdf)
+		}
 	}
 
 	var appInfo: SteamAppInfo? {

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2024 Legiayayana <ada@chronovore.dev>
 // SPDX-License-Identifier: EUPL-1.2
 
+import ArgumentParser
 import Foundation
 
 enum ByteFormatting: UInt {
@@ -18,6 +19,12 @@ enum ASCIIColor: String {
 	case cyan = "\u{001B}[0;36m"
 	case white = "\u{001B}[0;37m"
 	case `default` = "\u{001B}[0;0m"
+}
+
+extension Collection {
+	subscript(optionally index: Index) -> Element? {
+		indices.contains(index) ? self[index] : nil
+	}
 }
 
 extension URL {
@@ -47,6 +54,17 @@ extension URL {
 
 	@inlinable var isReadable: Bool {
 		(try? resourceValues(forKeys: [.isReadableKey]).isReadable) ?? false
+	}
+}
+
+extension URL: @retroactive ExpressibleByArgument {
+	/// initializes a string via a string argument.
+	public init(argument: String) {
+		if let url = URL(string: argument) {
+			self = url
+		} else {
+			self = URL(filePath: argument)
+		}
 	}
 }
 
