@@ -4,8 +4,21 @@
 import Foundation
 
 /// All possible state values for installed apps.
-public struct ACFAppState: OptionSet, Sendable {
+public struct ACFAppState: OptionSet, Sendable, Hashable, CustomStringConvertible {
 	public let rawValue: UInt
+
+	/// a textual representation of this option set.
+	public var description: String {
+		let filtered = ACFAppState.descriptors.filter { element in
+			self.contains(element.key)
+		}
+
+		if filtered.isEmpty {
+			return "none"
+		}
+
+		return filtered.values.joined(separator: ", ")
+	}
 
 	public static let uninstalled = ACFAppState(rawValue: 0x1)
 	public static let updateRequired = ACFAppState(rawValue: 0x2)
@@ -26,29 +39,80 @@ public struct ACFAppState: OptionSet, Sendable {
 	public static let updateHidden = ACFAppState(rawValue: 0x10000)
 	public static let prefetchingInfo = ACFAppState(rawValue: 0x20000)
 
+	static private let descriptors: [Self: String] = [
+		.uninstalled: "uninstalled",
+		.updateRequired: "update required",
+		.fullyInstalled: "fully installed",
+		.updateQueued: "update queued",
+		.updateOptional: "update optional",
+		.filesMissing: "missing",
+		.sharedOnly: "shared only",
+		.filesCorrupt: "corrupt",
+		.updateRunning: "update running",
+		.updatePaused: "update paused",
+		.updateStarted: "update started",
+		.uninstalling: "uninstalling",
+		.backupRunning: "backup running",
+		.appRunning: "app running",
+		.componentInUse: "component in use",
+		.movingFolder: "moving folder",
+		.updateHidden: "update hidden",
+		.prefetchingInfo: "prefetching info",
+	]
+
 	public init(rawValue: UInt) {
 		self.rawValue = rawValue
+	}
+
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(rawValue)
 	}
 }
 
 /// Whether or not an update recently succeeded.
-public enum ACFUpdateResult: UInt {
-	case success
+public enum ACFUpdateResult: UInt, CustomStringConvertible {
 	case failure
+	case success
+
+	/// a textual representation of this enum.
+	public var description: String {
+		switch self {
+			case .failure: "success"
+			case .success: "failure"
+		}
+	}
 }
 
 /// Determines how Steam should auto update games.
-public enum ACFAutoUpdateBehavior: UInt {
+public enum ACFAutoUpdateBehavior: UInt, CustomStringConvertible {
 	case automatic
 	case beforeStart
 	case highPriority
+
+	/// a textual representation of this enum.
+	public var description: String {
+		switch self {
+			case .automatic: "automatic"
+			case .beforeStart: "before app start"
+			case .highPriority: "high priority"
+		}
+	}
 }
 
 /// Determines if Steam should allow background updates.
-public enum ACFBackgroundUpdateBehavior: UInt {
+public enum ACFBackgroundUpdateBehavior: UInt, CustomStringConvertible {
 	case deferToGlobalSetting
 	case allow
 	case disallow
+
+	/// a textual representation of this enum.
+	public var description: String {
+		switch self {
+			case .deferToGlobalSetting: "defer to global setting"
+			case .allow: "allow"
+			case .disallow: "disallow"
+		}
+	}
 }
 
 /// An installed depot with it's manifest and size.
@@ -198,7 +262,7 @@ public struct ApplicationContentFile: VDFContent {
 		sizeOnDisk = vdf["SizeOnDisk"]?.unsigned ?? 0
 		stagingSize = vdf["StagingSize"]?.unsigned ?? 0
 		buildID = vdf["BuildID"]?.unsigned ?? vdf["LastBuildID"]?.unsigned ?? 0
-		lastOwner = SteamID(vdf["LastOwner"]?.unsigned ?? 0)
+		lastOwner = SteamID(rawValue: vdf["LastOwner"]?.unsigned ?? 0)
 		updateResult = ACFUpdateResult(rawValue: vdf["UpdateResult"]?.unsigned ?? 0) ?? .success
 		bytesToDownload = vdf["BytesToDownload"]?.unsigned ?? 0
 		bytesDownloaded = vdf["BytesDownloaded"]?.unsigned ?? 0

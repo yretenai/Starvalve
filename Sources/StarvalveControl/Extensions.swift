@@ -4,6 +4,14 @@
 import ArgumentParser
 import Foundation
 
+#if os(Linux)
+	import Glibc
+#elseif os(Windows)
+	import CRT
+#else
+	import Darwin
+#endif
+
 enum ByteFormatting: UInt {
 	case baseTen = 1000
 	case powerOfTwo = 1024
@@ -19,6 +27,22 @@ enum ASCIIColor: String {
 	case cyan = "\u{001B}[0;36m"
 	case white = "\u{001B}[0;37m"
 	case `default` = "\u{001B}[0;0m"
+
+	static var isTerminalSupported: Bool {
+		#if os(Windows)
+			let isatty = _isatty
+		#endif
+		if ProcessInfo.processInfo.environment["STARVALVE_USE_COLOR"] != nil {
+			return true
+		}
+
+		guard let termType = ProcessInfo.processInfo.environment["TERM"],
+			termType.lowercased() != "dumb" && isatty(STDOUT_FILENO) != 0
+		else {
+			return false
+		}
+		return true
+	}
 }
 
 extension Collection {
@@ -91,7 +115,11 @@ extension FileManager {
 
 extension DefaultStringInterpolation {
 	mutating func appendInterpolation<T: CustomStringConvertible>(_ value: T, color: ASCIIColor) {
-		appendInterpolation("\(color.rawValue)\(value)\(ASCIIColor.default.rawValue)")
+		if ASCIIColor.isTerminalSupported {
+			appendInterpolation("\(color.rawValue)\(value)\(ASCIIColor.default.rawValue)")
+		} else {
+			appendInterpolation(value)
+		}
 	}
 }
 

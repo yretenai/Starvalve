@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 /// Structure for 64-bit SteamIDs.
-public struct SteamID {
+public struct SteamID: Hashable, RawRepresentable, CustomStringConvertible {
+
 	public var rawValue: UInt
 
 	public var description: String {
@@ -90,8 +91,8 @@ public struct SteamID {
 		rawValue = 0
 	}
 
-	public init(_ value: UInt) {
-		rawValue = value
+	public init(rawValue: UInt) {
+		self.rawValue = rawValue
 	}
 
 	public init(accountID: UInt, instanceID: UInt = 1, type: SteamAccountType = .profile, universe: SteamUniverse = .steam) {
@@ -109,5 +110,9 @@ public struct SteamID {
 		self.instanceID = instanceID
 		self.type = type
 		self.universe = universe
+	}
+
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(rawValue)
 	}
 }

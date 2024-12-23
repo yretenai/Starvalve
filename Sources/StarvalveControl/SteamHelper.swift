@@ -99,6 +99,26 @@ struct SteamHelper {
 		}
 	}
 
+	var users: [SteamID: String] {
+		let path = steamPath.appending(path: "config/loginusers.vdf", directoryHint: .notDirectory)
+		guard let vdf = try? TextVDF.read(url: path) else {
+			return [:]
+		}
+
+		var result: [SteamID: String] = [:]
+		for item in vdf {
+			guard let id = item.key.unsigned else {
+				continue
+			}
+			guard let name = item["PersonaName"]?.string ?? item["AccountName"]?.string else {
+				continue
+			}
+			result[SteamID(rawValue: id)] = name
+		}
+
+		return result
+	}
+
 	var appInfo: SteamAppInfo? {
 		let path = steamPath.appending(path: "appcache/appinfo.vdf", directoryHint: .notDirectory)
 		guard let data = try? Data(contentsOf: path) else {

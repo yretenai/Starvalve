@@ -4,7 +4,7 @@
 import Foundation
 
 /// Node value structure for VDF elements.
-public struct ValveKeyValueNode: VDFInitializable, ExpressibleByStringLiteral {
+public struct ValveKeyValueNode: VDFInitializable, ExpressibleByStringLiteral, CustomStringConvertible {
 	public let value: String?
 
 	public var description: String {
@@ -140,7 +140,7 @@ public struct ValveKeyValueNode: VDFInitializable, ExpressibleByStringLiteral {
 }
 
 /// An element for VDF structures.
-public class ValveKeyValue: Sequence, VDFContent {
+public class ValveKeyValue: VDFContent, Sequence, CustomStringConvertible {
 	public typealias Element = ValveKeyValue
 	public typealias Iterator = [ValveKeyValue].Iterator
 
@@ -431,13 +431,13 @@ public class ValveKeyValue: Sequence, VDFContent {
 	}
 
 	public func to<T: VDFContent>(sequence type: T.Type) -> [T] {
-		return makeIterator().compactMap { kv in
+		return self.compactMap { kv in
 			type.init(vdf: kv)
 		}
 	}
 
 	public func to<T: VDFInitializable>(sequence type: T.Type) -> [T] {
-		return makeIterator().compactMap { kv in
+		return self.compactMap { kv in
 			type.init(vdfValue: kv.value)
 		}
 	}
@@ -445,7 +445,7 @@ public class ValveKeyValue: Sequence, VDFContent {
 	public func to<TKey: VDFInitializable, TValue: VDFContent>(key keyType: TKey.Type, value valueType: TValue.Type) -> [TKey: TValue] {
 		var result: [TKey: TValue] = [:]
 
-		for element in makeIterator() {
+		for element in self {
 			guard let key = TKey.init(vdfValue: element.key) else {
 				continue
 			}
@@ -463,7 +463,7 @@ public class ValveKeyValue: Sequence, VDFContent {
 	public func to<TKey: VDFInitializable, TValue: VDFInitializable>(key keyType: TKey.Type, value valueType: TValue.Type) -> [TKey: TValue] {
 		var result: [TKey: TValue] = [:]
 
-		for element in makeIterator() {
+		for element in self {
 			guard let key = TKey.init(vdfValue: element.key) else {
 				continue
 			}

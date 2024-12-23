@@ -8,7 +8,7 @@ struct StagingCommand: ParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "staging",
 		abstract: "Commands relating to Staging Directories",
-		subcommands: [ListStagingLibrariesCommand.self],
+		subcommands: [ListStagingLibrariesCommand.self, SetStagingLibraryCommand.self],
 		defaultSubcommand: ListStagingLibrariesCommand.self
 	)
 }

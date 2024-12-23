@@ -12,12 +12,12 @@ SPDX-License-Identifier: EUPL-1.2
 - [ ] `uninstall [appid...]` command (uninstall a game without running uninstall scripts)
 - [ ] `args <appid> <args>` command (edit game launch arguments)
 - [ ] `move <appid> <library>` command (move game from one library to another)
-- [ ] `list` command (list installed games)
+- [x] `list` command (list installed games)
 - [x] `library list` command (list libraries)
 - [x] `library label <library> <label>` command (set library label)
 - [x] `library purge <library>` command (delete an entire library)
 - [x] `staging list` command (list all games that have other libraries as staging directories)
-- [ ] `staging set <appid> <library>` command (manage the staging library for a given game)
+- [x] `staging set <appid> <library>` command (manage the staging library for a given game)
 - [ ] write more tests (mock binary vdf files?)
 - [ ] write better docs
 - [ ] generate docc
