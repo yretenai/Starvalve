@@ -61,7 +61,7 @@ struct ListAppsCommand: ParsableCommand {
 				print("\tlast updated: \(appInfo.acf.lastUpdated, color: .blue)")
 				print("\tscheduled update time: \(appInfo.acf.scheduledAutoUpdate, color: .blue)")
 				print("\tbuild id: \(appInfo.acf.buildID, color: .magenta)")
-				print("\ttarget build id: \(appInfo.acf.lastBuildId, color: .magenta)")
+				print("\ttarget build id: \(appInfo.acf.targetBuildID, color: .magenta)")
 				if appInfo.acf.lastOwner.rawValue != 0 {
 					print("\tlast owner: \(users[appInfo.acf.lastOwner] ?? appInfo.acf.lastOwner.steam3, color: .green) (\(appInfo.acf.lastOwner, color: .red))")
 				}

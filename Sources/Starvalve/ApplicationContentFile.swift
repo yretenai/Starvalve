@@ -226,7 +226,6 @@ public struct ApplicationContentFile: VDFContent {
 	public var stagingFolder: Int?  // index of library folder in libraryfolders.vdf
 	public var needsUpdate: Bool = false
 	public var needsDownload: Bool = false
-	public var lastBuildId: Bool = false
 	public var installedDepots: [UInt: ACFInstalledApplicationDepot] = [:]
 	public var sharedDepots: [UInt: UInt] = [:]
 	public var installScripts: [UInt: String] = [:]
