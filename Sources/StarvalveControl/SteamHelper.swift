@@ -19,7 +19,7 @@ struct AppInfo {
 	let compatDataPath: URL
 	let shaderCachePath: URL
 
-	init?(libraryPath library: URL, appId: UInt) {
+	init?(libraryPath library: URL, appId: UInt, detailed: Bool = true) {
 		acfPath = library.appending(path: "steamapps/appmanifest_\(appId).acf", directoryHint: .notDirectory)
 		workshopAcfPath = library.appending(path: "steamapps/workshop/appworkshop_\(appId).acf", directoryHint: .notDirectory)
 		workshopPath = library.appending(path: "steamapps/workshop/content/\(appId)", directoryHint: .isDirectory)
@@ -35,6 +35,13 @@ struct AppInfo {
 		}
 
 		self.acf = acf
+
+		guard detailed else {
+			workshop = nil
+			compatDataSize = 0
+			shaderCacheSize = 0
+			return
+		}
 
 		if let vdf = try? TextVDF.read(url: workshopAcfPath),
 			let workshopAcf = ApplicationContentFile(vdf: vdf)

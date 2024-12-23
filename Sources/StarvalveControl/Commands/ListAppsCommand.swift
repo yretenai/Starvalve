@@ -28,22 +28,20 @@ struct ListAppsCommand: ParsableCommand {
 		}
 
 		let users = steam.users
+		var strayPaths: [String] = []
 
 		for library in libraries.entries {
-			var knownPaths: Set<URL> = []
+			var knownPaths: Set<String> = []
 
-			var appIds = library.apps.sorted(by: { left, right in
-				left.value > right.value
-			})
-
-			if !self.appIds.isEmpty {
-				appIds = appIds.filter({ item in
+			let filteredAppIds =
+				self.appIds.isEmpty
+				? library.apps
+				: library.apps.filter({ item in
 					self.appIds.contains(item.key)
 				})
-			}
 
-			for (appId, appSize) in appIds {
-				guard let appInfo = AppInfo(libraryPath: library.path, appId: appId) else {
+			for (appId, appSize) in filteredAppIds {
+				guard let appInfo = AppInfo(libraryPath: library.path, appId: appId, detailed: detailed) else {
 					print("⚠️ app \(appId, color: .magenta) has a missing manifest")
 					continue
 				}
@@ -54,7 +52,7 @@ struct ListAppsCommand: ParsableCommand {
 					continue
 				}
 
-				knownPaths.insert(library.path.appending(path: "common/\(appInfo.acf.installDir)", directoryHint: .isDirectory))
+				knownPaths.insert(library.path.appending(path: "common/\(appInfo.acf.installDir)", directoryHint: .isDirectory).canonicalPath.path)
 
 				print("\tsize: \(appSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 				if let workshop = appInfo.workshop, workshop.sizeOnDisk > 0 {
@@ -83,14 +81,27 @@ struct ListAppsCommand: ParsableCommand {
 				print("\tupdate result: \(appInfo.acf.updateResult, color: .cyan)")
 				print("\tupdate behavior: \(appInfo.acf.autoUpdateBehavior, color: .cyan)")
 				print("\tbackground behavior: \(appInfo.acf.allowOtherDownloadsWhileRunning, color: .cyan)")
-				print("\tneeds update: \(appInfo.acf.needsUpdate, color: .cyan)")
-				print("\tneeds download: \(appInfo.acf.needsDownload, color: .cyan)")
 				if let stagingIndex = appInfo.acf.stagingFolder {
 					print("\tstaging library: \(libraries.entries[optionally: stagingIndex]?.path.path ?? "invalid", color: .magenta)")
 				}
 				print("\tstaging size \(appInfo.acf.stagingSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 				print()
 			}
+
+			guard let libraryContents = try? FileManager.default.contentsOfDirectory(at: library.path.appending(path: "common", directoryHint: .isDirectory), includingPropertiesForKeys: nil) else {
+				continue
+			}
+
+			strayPaths.append(
+				contentsOf: libraryContents.filter({ url in
+					url.isDirectory && !knownPaths.contains(url.canonicalPath.path)
+				}).map({ url in
+					url.canonicalPath.path
+				}))
+		}
+
+		for stray in strayPaths {
+			print("⚠️ \(stray, color: .green) is leftover uninstall debris")
 		}
 	}
 }

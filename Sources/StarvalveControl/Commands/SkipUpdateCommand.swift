@@ -25,15 +25,14 @@ struct SkipUpdateCommand: ParsableCommand {
 		}
 
 		for library in libraries.entries {
-			var appIds = library.apps.sorted(by: { left, right in
-				left.value > right.value
-			})
+			let filteredAppIds =
+				self.appIds.isEmpty
+				? library.apps
+				: library.apps.filter({ item in
+					self.appIds.contains(item.key)
+				})
 
-			appIds = appIds.filter({ item in
-				self.appIds.contains(item.key)
-			})
-
-			for (appId, _) in appIds {
+			for (appId, _) in filteredAppIds {
 				guard let appInfo = AppInfo(libraryPath: library.path, appId: appId) else {
 					print("⚠️ app \(appId, color: .magenta) has a missing manifest")
 					continue

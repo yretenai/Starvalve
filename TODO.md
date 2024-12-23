@@ -19,6 +19,7 @@ SPDX-License-Identifier: EUPL-1.2
 - [x] `library purge <library>` command (delete an entire library)
 - [x] `staging list` command (list all games that have other libraries as staging directories)
 - [x] `staging set <appid> <library>` command (manage the staging library for a given game)
+- [ ] `workshop list <appid>` command (list workship items)
 - [ ] write more tests (mock binary vdf files?)
 - [ ] write better docs
 - [ ] generate docc

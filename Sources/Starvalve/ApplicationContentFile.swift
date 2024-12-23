@@ -224,8 +224,6 @@ public struct ApplicationContentFile: VDFContent {
 	public var allowOtherDownloadsWhileRunning: ACFBackgroundUpdateBehavior = .deferToGlobalSetting
 	public var scheduledAutoUpdate: Date = Date(timeIntervalSince1970: 0)
 	public var stagingFolder: Int?  // index of library folder in libraryfolders.vdf
-	public var needsUpdate: Bool = false
-	public var needsDownload: Bool = false
 	public var installedDepots: [UInt: ACFInstalledApplicationDepot] = [:]
 	public var sharedDepots: [UInt: UInt] = [:]
 	public var installScripts: [UInt: String] = [:]
