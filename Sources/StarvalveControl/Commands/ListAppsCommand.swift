@@ -14,6 +14,9 @@ struct ListAppsCommand: ParsableCommand {
 	@Flag(help: "Print detailed app information")
 	var detailed: Bool = false
 
+	@Argument(help: "App ids to process")
+	var appIds: [UInt] = []
+
 	@OptionGroup var globals: GlobalOptions
 
 	func run() {
@@ -29,11 +32,19 @@ struct ListAppsCommand: ParsableCommand {
 		for library in libraries.entries {
 			var knownPaths: Set<URL> = []
 
-			for (appId, appSize) in library.apps.sorted(by: { left, right in
+			var appIds = library.apps.sorted(by: { left, right in
 				left.value > right.value
-			}) {
+			})
+
+			if !self.appIds.isEmpty {
+				appIds = appIds.filter({ item in
+					self.appIds.contains(item.key)
+				})
+			}
+
+			for (appId, appSize) in appIds {
 				guard let appInfo = AppInfo(libraryPath: library.path, appId: appId) else {
-					print("app \(appId, color: .magenta)")
+					print("⚠️ app \(appId, color: .magenta) has a missing manifest")
 					continue
 				}
 

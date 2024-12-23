@@ -71,14 +71,14 @@ public struct ACFAppState: OptionSet, Sendable, Hashable, CustomStringConvertibl
 
 /// Whether or not an update recently succeeded.
 public enum ACFUpdateResult: UInt, CustomStringConvertible {
-	case failure
 	case success
+	case failure
 
 	/// a textual representation of this enum.
 	public var description: String {
 		switch self {
-			case .failure: "success"
-			case .success: "failure"
+			case .success: "success"
+			case .failure: "failure"
 		}
 	}
 }
