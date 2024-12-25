@@ -131,7 +131,6 @@ struct SteamHelper {
 		var result: [SteamID: SteamShortcuts] = [:]
 		for (user, _) in users {
 			let path = steamPath.appending(path: "userdata/\(user.accountID)/config/shortcuts.vdf", directoryHint: .notDirectory)
-			let fullPath = path.path
 			guard let vdf = try? BinaryVDF.read(url: path) else {
 				continue
 			}
