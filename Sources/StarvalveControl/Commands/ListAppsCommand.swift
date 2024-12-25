@@ -157,6 +157,7 @@ struct ListAppsCommand: ParsableCommand {
 					}).joined(separator: ", ")
 					print("\ttags: [\(tags)]")
 				}
+				print()
 			}
 		}
 
