@@ -12,7 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 - [ ] `uninstall [appid...]` command (uninstall a game without running uninstall scripts)
 - [ ] `args <appid> <args>` command (edit game launch arguments)
 - [ ] `move <appid> <library>` command (move game from one library to another)
-- [ ] `skip <appid>` command (cancel steam update)
+- [x] `skip <appid>` command (cancel steam update)
 - [x] `list <appid...>` command (list installed games)
 - [x] `library list` command (list libraries)
 - [x] `library label <library> <label>` command (set library label)
