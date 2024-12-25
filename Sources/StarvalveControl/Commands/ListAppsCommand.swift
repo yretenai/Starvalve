@@ -28,6 +28,26 @@ struct ListAppsCommand: ParsableCommand {
 		}
 
 		let users = steam.users
+		var appConfig: [UInt: [SteamID: ValveKeyValue]] = [:]
+		for (key, value) in steam.localConfig {
+			guard let vdf = value["Software"]?["Valve"]?["Steam"]?["Apps"] else {
+				continue
+			}
+
+			for element in vdf {
+				guard let appID = element.key.signed else {
+					continue
+				}
+
+				let unsignedAppID = appID < 0 ? 0xFFFF_FFFF - UInt(~appID) : UInt(appID)
+				if var userAppConfig = appConfig[unsignedAppID] {
+					userAppConfig[key] = element
+				} else {
+					appConfig[unsignedAppID] = [key: element]
+				}
+			}
+		}
+
 		var strayPaths: [String] = []
 
 		guard let primaryLibrary = libraries.entries.first else {
@@ -97,6 +117,18 @@ struct ListAppsCommand: ParsableCommand {
 					print("\tstaging library: \(libraries.entries[optionally: stagingIndex]?.path.path ?? "invalid", color: .magenta)")
 				}
 				print("\tstaging size \(appInfo.acf.stagingSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+				if let userInfo = appConfig[appId] {
+					print("\tplay stats")
+					for (userId, vdf) in userInfo {
+						print("\t\t\(users[userId] ?? userId.steam3, color: .green) (\(userId, color: .red))")
+						print("\t\tlast played: \((vdf["LastPlayed"]?.date ?? Date(timeIntervalSince1970: 0)).nowOrNever, color: .blue)")
+						if let launchArgs = vdf["LaunchOptions"]?.string, !launchArgs.isEmpty {
+							print("\t\tlaunch args: \(vdf["LaunchOptions"]?.string ?? "", color: .green)")
+						}
+						print("\t\tplaytime: \(TimeInterval((vdf["Playtime"]?.unsigned ?? 0) * 60).durationDescription, color: .blue)")
+						print()
+					}
+				}
 				print()
 			}
 
@@ -113,8 +145,15 @@ struct ListAppsCommand: ParsableCommand {
 		}
 
 		for (user, shortcuts) in steam.shortcuts {
-			for shortcut in shortcuts.entries {
-				print("shortcut (\(users[user] ?? user.steam3, color: .green)) \(shortcut.name, color: .green) (\(shortcut.appID, color: .magenta))")
+			let filteredShortcuts =
+				self.appIds.isEmpty
+				? shortcuts.entries
+				: shortcuts.entries.filter({ item in
+					self.appIds.contains(item.appID)
+				})
+
+			for shortcut in filteredShortcuts {
+				print("shortcut (\(users[user] ?? user.steam3, color: .green) (\(user, color: .red))) \(shortcut.name, color: .green) (\(shortcut.appID, color: .magenta))")
 
 				guard detailed else {
 					continue
@@ -157,6 +196,20 @@ struct ListAppsCommand: ParsableCommand {
 					}).joined(separator: ", ")
 					print("\ttags: [\(tags)]")
 				}
+
+				if let userInfo = appConfig[shortcut.appID] {
+					print("\tplay stats")
+					for (userId, vdf) in userInfo {
+						print("\t\t\(users[userId] ?? userId.steam3, color: .green) (\(userId, color: .red))")
+						print("\t\tlast played: \((vdf["LastPlayed"]?.date ?? Date(timeIntervalSince1970: 0)).nowOrNever, color: .blue)")
+						if let launchArgs = vdf["LaunchOptions"]?.string, !launchArgs.isEmpty {
+							print("\t\tlaunch args: \(vdf["LaunchOptions"]?.string ?? "", color: .green)")
+						}
+						print("\t\tplaytime: \(TimeInterval((vdf["Playtime"]?.unsigned ?? 0) * 60).durationDescription, color: .blue)")
+						print()
+					}
+				}
+
 				print()
 			}
 		}

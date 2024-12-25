@@ -17,11 +17,7 @@ struct CleanAppsCommand: ParsableCommand {
 			"""
 	)
 
-	@Flag(name: [.customShort("n", allowingJoined: true), .long], help: "Don't actually delete files")
-	var dry: Bool = false
-
-	@Flag(name: [.customShort("i", allowingJoined: true), .long], help: "Prompt before actually deleting anything")
-	var interactive: Bool = false
+	@OptionGroup var volatile: VolatileOptions
 
 	@OptionGroup var globals: GlobalOptions
 
@@ -63,7 +59,7 @@ struct CleanAppsCommand: ParsableCommand {
 						continue
 					}
 
-					if interactive {
+					if volatile.interactive {
 						print("Delete \"\(strayPath.path, color: .red)\"? [Y/n]:", terminator: " ")
 						guard let line = readLine(strippingNewline: true),
 							let firstChar = line.lowercased().first,
@@ -75,7 +71,7 @@ struct CleanAppsCommand: ParsableCommand {
 
 					print("⚠️ Deleting leftover install directory \(strayPath.path, color: .red)")
 
-					guard !dry else {
+					guard !volatile.dry else {
 						continue
 					}
 
@@ -96,7 +92,7 @@ struct CleanAppsCommand: ParsableCommand {
 					continue
 				}
 
-				if interactive {
+				if volatile.interactive {
 					print("Delete \"\(appPath.path, color: .red)\"? [Y/n]:", terminator: " ")
 					guard let line = readLine(strippingNewline: true),
 						let firstChar = line.lowercased().first,
@@ -108,7 +104,7 @@ struct CleanAppsCommand: ParsableCommand {
 
 				print("⚠️ Deleting leftover support directory \(appPath.path, color: .red)")
 
-				guard !dry else {
+				guard !volatile.dry else {
 					continue
 				}
 

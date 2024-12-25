@@ -17,6 +17,8 @@ struct PurgeLibraryCommand: ParsableCommand {
 	@Option(help: "The staging library to use for any libraries that rely on the specified library.", completion: .directory)
 	var stagingPath: URL?
 
+	@OptionGroup var volatile: VolatileOptions
+
 	@OptionGroup var globals: GlobalOptions
 
 	func run() {
@@ -91,8 +93,31 @@ struct PurgeLibraryCommand: ParsableCommand {
 			}
 		}
 
-		// todo: delete folder if it exists?
+		guard !volatile.dry else {
+			return
+		}
 
 		steam.libraryFolders = libraries
+
+		guard path.isDirectory, FileManager.default.fileExists(atPath: target) else {
+			return
+		}
+
+		if volatile.interactive {
+			print("Delete \"\(path.path, color: .red)\"? [Y/n]:", terminator: " ")
+			guard let line = readLine(strippingNewline: true),
+				let firstChar = line.lowercased().first,
+				firstChar == "Y"
+			else {
+				return
+			}
+		}
+
+		print("⚠️ Deleting library \(path.path, color: .red)")
+
+		guard (try? FileManager.default.removeItem(at: path)) != nil else {
+			print("⚠️ Could not delete directory")
+			return
+		}
 	}
 }

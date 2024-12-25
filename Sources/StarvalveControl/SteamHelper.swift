@@ -139,6 +139,18 @@ struct SteamHelper {
 		return result
 	}
 
+	var localConfig: [SteamID: ValveKeyValue] {
+		var result: [SteamID: ValveKeyValue] = [:]
+		for (user, _) in users {
+			let path = steamPath.appending(path: "userdata/\(user.accountID)/config/localconfig.vdf", directoryHint: .notDirectory)
+			guard let vdf = try? TextVDF.read(url: path) else {
+				continue
+			}
+			result[user] = vdf
+		}
+		return result
+	}
+
 	var appInfo: SteamAppInfo? {
 		let path = steamPath.appending(path: "appcache/appinfo.vdf", directoryHint: .notDirectory)
 		guard let data = try? Data(contentsOf: path) else {

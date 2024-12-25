@@ -103,7 +103,8 @@ extension FileManager {
 			}
 
 			if let fileType = attributes[.type] as? FileAttributeType,
-				fileType == .typeSymbolicLink {
+				fileType == .typeSymbolicLink
+			{
 				continue
 			}
 
@@ -135,5 +136,70 @@ extension Date {
 		}
 
 		return self.description
+	}
+}
+
+extension TimeInterval {
+	var durationDescription: String {
+		var value = Int(self)
+
+		if value <= 0 {
+			return "zero seconds"
+		}
+
+		// DateComponentsFormatter is not implemented outside of Apple platforms
+		let secondsInMinute = 60
+		let secondsInHour = 3600
+		let secondsInDay = 86400
+		let secondsInWeek = 604800
+		let secondsInMonth = 2_624_016
+		let secondsInYear = 31_556_952
+
+		var parts: [String] = []
+		if value > secondsInYear {
+			let years = value / secondsInYear
+			parts.append("\(years) year\(years != 1 ? "s" : "")")
+			value -= years * secondsInYear
+		}
+
+		if value > secondsInMonth {
+			let months = value / secondsInMonth
+			parts.append("\(months) month\(months != 1 ? "s" : "")")
+			value -= months * secondsInMonth
+		}
+
+		if value > secondsInWeek {
+			let weeks = value / secondsInWeek
+			parts.append("\(weeks) week\(weeks != 1 ? "s" : "")")
+			value -= weeks * secondsInWeek
+		}
+
+		if value > secondsInDay {
+			let days = value / secondsInDay
+			parts.append("\(days) day\(days != 1 ? "s" : "")")
+			value -= days * secondsInDay
+		}
+
+		if value > secondsInHour {
+			let hours = value / secondsInHour
+			parts.append("\(hours) hour\(hours != 1 ? "s" : "")")
+			value -= hours * secondsInHour
+		}
+
+		if value > secondsInMinute {
+			let minutes = value / secondsInMinute
+			parts.append("\(minutes) minute\(minutes != 1 ? "s" : "")")
+			value -= minutes * secondsInMinute
+		}
+
+		if value > 0 {
+			parts.append("\(value) second\(value != 1 ? "s" : "")")
+		}
+
+		if parts.count > 1 {
+			parts.append("and \(parts.removeLast())")
+		}
+
+		return parts.joined(separator: ", ")
 	}
 }
