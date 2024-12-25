@@ -30,6 +30,10 @@ struct ListAppsCommand: ParsableCommand {
 		let users = steam.users
 		var strayPaths: [String] = []
 
+		guard let primaryLibrary = libraries.entries.first else {
+			return
+		}
+
 		for library in libraries.entries {
 			var knownPaths: Set<String> = []
 
@@ -41,39 +45,47 @@ struct ListAppsCommand: ParsableCommand {
 				})
 
 			for (appId, appSize) in filteredAppIds {
-				guard let appInfo = AppInfo(libraryPath: library.path, appId: appId, detailed: detailed) else {
+				let appInfo = AppInfo(libraryPath: library.path, appId: appId, detailed: detailed)
+
+				guard !appInfo.missingManifest else {
 					print("⚠️ app \(appId, color: .magenta) has a missing manifest")
 					continue
 				}
 
 				print("app \(appInfo.acf.name, color: .green) (\(appId, color: .magenta))")
 
-				if !detailed {
+				guard detailed else {
 					continue
 				}
 
 				knownPaths.insert(library.path.appending(path: "common/\(appInfo.acf.installDir)", directoryHint: .isDirectory).canonicalPath.path)
 
 				print("\tsize: \(appSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+
 				if let workshop = appInfo.workshop, workshop.sizeOnDisk > 0 {
 					print("\tworkshop: \(workshop.sizeOnDisk.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 				}
+
 				if appInfo.compatDataSize > 0 {
 					print("\tcompatdata: \(appInfo.compatDataSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 				}
+
 				if appInfo.shaderCacheSize > 0 {
 					print("\tshadercache: \(appInfo.shaderCacheSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 				}
+
 				print("\tstate: \(appInfo.acf.stateFlags, color: .cyan)")
 				print("\tinstall dir: \(appInfo.acf.installDir, color: .green)")
-				print("\tlast played: \(appInfo.acf.lastPlayed, color: .blue)")
-				print("\tlast updated: \(appInfo.acf.lastUpdated, color: .blue)")
-				print("\tscheduled update time: \(appInfo.acf.scheduledAutoUpdate, color: .blue)")
+				print("\tlast played: \(appInfo.acf.lastPlayed.nowOrNever, color: .blue)")
+				print("\tlast updated: \(appInfo.acf.lastUpdated.nowOrNever, color: .blue)")
+				print("\tscheduled update time: \(appInfo.acf.scheduledAutoUpdate.nowOrNever, color: .blue)")
 				print("\tbuild id: \(appInfo.acf.buildID, color: .magenta)")
 				print("\ttarget build id: \(appInfo.acf.targetBuildID, color: .magenta)")
+
 				if appInfo.acf.lastOwner.rawValue != 0 {
 					print("\tlast owner: \(users[appInfo.acf.lastOwner] ?? appInfo.acf.lastOwner.steam3, color: .green) (\(appInfo.acf.lastOwner, color: .red))")
 				}
+
 				print("\tbytes to download: \(appInfo.acf.bytesToDownload.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 				print("\tbytes to stage: \(appInfo.acf.bytesToStage.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
 				print("\tbytes downloaded: \(appInfo.acf.bytesDownloaded.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
@@ -98,6 +110,54 @@ struct ListAppsCommand: ParsableCommand {
 				}).map({ url in
 					url.canonicalPath.path
 				}))
+		}
+
+		for (user, shortcuts) in steam.shortcuts {
+			for shortcut in shortcuts.entries {
+				print("shortcut (\(users[user] ?? user.steam3, color: .green)) \(shortcut.name, color: .green) (\(shortcut.appID, color: .magenta))")
+
+				guard detailed else {
+					continue
+				}
+
+				let appInfo = AppInfo(libraryPath: primaryLibrary.path, appId: shortcut.appID, detailed: true)
+
+				if appInfo.compatDataSize > 0 {
+					print("\tcompatdata: \(appInfo.compatDataSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+				}
+
+				if appInfo.shaderCacheSize > 0 {
+					print("\tshadercache: \(appInfo.shaderCacheSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+				}
+
+				print("\texecutable: \(shortcut.executable, color: .green)")
+				print("\tstart in: \(shortcut.startIn.path, color: .green)")
+				print("\tlaunch args: \("\"\(shortcut.launchArgs)\"", color: .green)")
+				print("\tshortcut path: \(shortcut.shortcutPath.path, color: .green)")
+				print("\tlast played: \(shortcut.lastPlayTime.nowOrNever, color: .blue)")
+				print("\ticon: \(shortcut.icon.path, color: .green)")
+				print("\thidden: \(shortcut.isHidden, color: .cyan)")
+				print("\tdesktop: \(shortcut.allowDesktopConfig, color: .cyan)")
+				print("\toverlay: \(shortcut.allowOverlay, color: .cyan)")
+				print("\topenvr: \(shortcut.isOpenVR, color: .cyan)")
+				print("\tdevkit: \(shortcut.isDevkit, color: .cyan)")
+
+				if shortcut.isDevkit {
+					print("\tdevkit game id: \(shortcut.devkitAppID, color: .magenta)")
+					print("\tdevkit app id: \(shortcut.devkitOverrideAppID, color: .magenta)")
+				}
+
+				if !shortcut.flatpakAppID.isEmpty {
+					print("\tflatpak: \(shortcut.flatpakAppID, color: .green)")
+				}
+
+				if !shortcut.tags.isEmpty {
+					let tags = shortcut.tags.map({ tag in
+						return "\(tag, color: .green)"
+					}).joined(separator: ", ")
+					print("\ttags: [\(tags)]")
+				}
+			}
 		}
 
 		for stray in strayPaths {

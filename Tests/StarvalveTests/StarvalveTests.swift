@@ -192,7 +192,7 @@ let acfSample = """
 }
 
 @Test func packageInfoTest() throws {
-	guard let data = try? Data(contentsOf: URL(fileURLWithPath: "~/.steam/steam/appcache/packageinfo.vdf")) else {
+	guard let data = try? Data(contentsOf: URL(filePath: "~/.steam/steam/appcache/packageinfo.vdf", directoryHint: .notDirectory)) else {
 		return
 	}
 	let vdf = try #require(try SteamPackageInfo(data: data))
@@ -201,7 +201,7 @@ let acfSample = """
 }
 
 @Test func appInfoTest() throws {
-	guard let data = try? Data(contentsOf: URL(fileURLWithPath: "~/.steam/steam/appcache/appinfo.vdf")) else {
+	guard let data = try? Data(contentsOf: URL(filePath: "~/.steam/steam/appcache/appinfo.vdf", directoryHint: .notDirectory)) else {
 		return
 	}
 	let vdf = try #require(try SteamAppInfo(data: data))

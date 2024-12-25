@@ -69,19 +69,27 @@ struct ListLibrariesCommand: ParsableCommand {
 					print("\tapp \(appName, color: .green)")
 					print("\tid: \(appId, color: .magenta)")
 					print("\tsize: \(appSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
-					if let appInfo = AppInfo(libraryPath: library.path, appId: appId) {
-						if let workshop = appInfo.workshop, workshop.sizeOnDisk > 0 {
-							print("\tworkshop: \(workshop.sizeOnDisk.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
-						}
-						if appInfo.compatDataSize > 0 {
-							print("\tcompatdata: \(appInfo.compatDataSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
-						}
-						if appInfo.shaderCacheSize > 0 {
-							print("\tshadercache: \(appInfo.shaderCacheSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
-						}
-					} else {
-						print("\t⚠️ \("MISSING ACF", color: .red)")
+
+					let appInfo = AppInfo(libraryPath: library.path, appId: appId, detailed: true)
+
+					guard !appInfo.missingManifest else {
+						print("⚠️ app \(appId, color: .magenta) has a missing manifest")
+						print()
+						continue
 					}
+
+					if let workshop = appInfo.workshop, workshop.sizeOnDisk > 0 {
+						print("\tworkshop: \(workshop.sizeOnDisk.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+					}
+
+					if appInfo.compatDataSize > 0 {
+						print("\tcompatdata: \(appInfo.compatDataSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+					}
+
+					if appInfo.shaderCacheSize > 0 {
+						print("\tshadercache: \(appInfo.shaderCacheSize.formatted(.byteCount(style: .binary)).lowercased(), color: .yellow)")
+					}
+
 					print()
 				}
 			}

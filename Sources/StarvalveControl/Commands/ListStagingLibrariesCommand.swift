@@ -23,7 +23,9 @@ struct ListStagingLibrariesCommand: ParsableCommand {
 
 		for library in libraries.entries {
 			for (appId, _) in library.apps {
-				guard let appInfo = AppInfo(libraryPath: library.path, appId: appId) else {
+				let appInfo = AppInfo(libraryPath: library.path, appId: appId)
+
+				guard !appInfo.missingManifest else {
 					continue
 				}
 

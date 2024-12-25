@@ -18,23 +18,24 @@ struct AppInfo {
 	let workshopPath: URL
 	let compatDataPath: URL
 	let shaderCachePath: URL
+	let missingManifest: Bool
 
-	init?(libraryPath library: URL, appId: UInt, detailed: Bool = true) {
+	init(libraryPath library: URL, appId: UInt, detailed: Bool = true) {
 		acfPath = library.appending(path: "steamapps/appmanifest_\(appId).acf", directoryHint: .notDirectory)
 		workshopAcfPath = library.appending(path: "steamapps/workshop/appworkshop_\(appId).acf", directoryHint: .notDirectory)
 		workshopPath = library.appending(path: "steamapps/workshop/content/\(appId)", directoryHint: .isDirectory)
 		compatDataPath = library.appending(path: "steamapps/compatdata/\(appId)", directoryHint: .isDirectory)
 		shaderCachePath = library.appending(path: "steamapps/shadercache/\(appId)", directoryHint: .isDirectory)
 
-		guard let vdf = try? TextVDF.read(url: acfPath) else {
-			return nil
+		if let vdf = try? TextVDF.read(url: acfPath),
+			let acf = ApplicationContentFile(vdf: vdf)
+		{
+			self.acf = acf
+			missingManifest = false
+		} else {
+			self.acf = ApplicationContentFile(type: .appState)
+			missingManifest = true
 		}
-
-		guard let acf = ApplicationContentFile(vdf: vdf) else {
-			return nil
-		}
-
-		self.acf = acf
 
 		guard detailed else {
 			workshop = nil
@@ -123,6 +124,19 @@ struct SteamHelper {
 			result[SteamID(rawValue: id)] = name
 		}
 
+		return result
+	}
+
+	var shortcuts: [SteamID: SteamShortcuts] {
+		var result: [SteamID: SteamShortcuts] = [:]
+		for (user, _) in users {
+			let path = steamPath.appending(path: "userdata/\(user.accountID)/config/shortcuts.vdf", directoryHint: .notDirectory)
+			let fullPath = path.path
+			guard let vdf = try? BinaryVDF.read(url: path) else {
+				continue
+			}
+			result[user] = SteamShortcuts(vdf: vdf)
+		}
 		return result
 	}
 

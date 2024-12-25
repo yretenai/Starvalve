@@ -41,7 +41,9 @@ struct SetStagingLibraryCommand: ParsableCommand {
 					continue
 				}
 
-				guard let appInfo = AppInfo(libraryPath: library.path, appId: appId) else {
+				let appInfo = AppInfo(libraryPath: library.path, appId: appId)
+
+				guard !appInfo.missingManifest else {
 					continue
 				}
 

@@ -8,7 +8,7 @@ SPDX-License-Identifier: EUPL-1.2
 - [x] text vdf
 - [x] binary vdf
 - [x] appconfig vdf
-- [ ] `clean` command (remove leftover files and linux-specific cache files from game directories)
+- [x] `clean` command (remove leftover files and linux-specific cache files from game directories)
 - [ ] `uninstall [appid...]` command (uninstall a game without running uninstall scripts)
 - [ ] `args <appid> <args>` command (edit game launch arguments)
 - [ ] `move <appid> <library>` command (move game from one library to another)
