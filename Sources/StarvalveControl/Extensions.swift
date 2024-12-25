@@ -102,6 +102,11 @@ extension FileManager {
 				continue
 			}
 
+			if let fileType = attributes[.type] as? FileAttributeType,
+				fileType == .typeSymbolicLink {
+				continue
+			}
+
 			guard let fileSize = attributes[.size] as? Int64 else {
 				continue
 			}
