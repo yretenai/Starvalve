@@ -1,5 +1,5 @@
 // swift-tools-version: 6.0
-// SPDX-FileCopyrightText: 2024 Legiayayana <ada@chronovore.dev>
+// SPDX-FileCopyrightText: 2024-2025 Legiayayana <ada@chronovore.dev>
 // SPDX-License-Identifier: EUPL-1.2
 
 import PackageDescription
