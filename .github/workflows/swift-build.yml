@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2024-2025 Nobody
+# SPDX-License-Identifier: CC0-1.0
+
+name: "[Swift] Build"
+
+on: [push]
+
+jobs:
+  swift-cq:
+    name: "Swift Build [${{ matrix.os }}]"
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: yretenai/setup-swift@unsafe
+        with:
+          swift-version: "6.0.3"
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build -c release --static-swift-stdlib --product starvalvectl
+      - name: Stage
+        shell: bash
+        run: |
+          mkdir release
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            cp -rT "${LOCALAPPDATA}/Programs/Swift/Runtimes/6.0.3/usr/bin/" release
+            cp .build/release/starvalvectl.exe release
+          else
+            cp .build/release/starvalvectl release
+          fi
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Starvalve-${{ matrix.os }}
+          path: release

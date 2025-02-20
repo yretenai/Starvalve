@@ -7,16 +7,12 @@ on: [push]
 
 jobs:
   swift-cq:
-    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        swift: ["6.0.3"]
-    runs-on: ${{ matrix.os }}
+    name: Swift CQ
+    runs-on: ubuntu-latest
     steps:
-      - uses: yretenai/setup-swift@edge
+      - uses: yretenai/setup-swift@unsafe
         with:
-          swift-version: ${{ matrix.swift }}
+          swift-version: 6.0.3
       - uses: actions/checkout@v4
       - name: Lint
         run: swift format lint --configuration swift-format.json --strict --recursive .

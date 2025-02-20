@@ -192,12 +192,12 @@ struct SteamHelper {
 	}
 
 	#if canImport(WinSDK)
-		static func findSteamViaRegistry() -> String? {
-			return #"SOFTWARE\Valve\Steam"#.withCString(encodedAs: UTF16.self) { regPath in
-				return "InstallPath".withCString(encodedAs: UTF16.self) { regKey in
-					var size: DWORD = PATH_MAX
-					var buffer: [WCHAR] = [WCHAR](repeating: 0, count: size)
-					guard RegGetValueW(HKEY_LOCAL_MACHINE, regPath, regKey, RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY | RRF_ZEROONFAILURE, nil, &buffer, &size) == ERROR_SUCCESS else {
+		static func findSteamViaRegistry() -> URL? {
+			return #"SOFTWARE\Valve\Steam"#.withCString(encodedAs: UTF16.self) { regPath -> URL? in
+				return "InstallPath".withCString(encodedAs: UTF16.self) { regKey -> URL? in
+					var size: DWORD = 260
+					var buffer: [WCHAR] = [WCHAR](repeating: 0, count: 261)
+					guard RegGetValueW(HKEY_LOCAL_MACHINE, regPath, regKey, DWORD(RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY | RRF_ZEROONFAILURE), nil, &buffer, &size) == ERROR_SUCCESS else {
 						return nil
 					}
 					return URL(filePath: String(decodingCString: buffer, as: UTF16.self), directoryHint: .isDirectory)

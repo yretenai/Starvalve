@@ -7,16 +7,12 @@ on: [push]
 
 jobs:
   swift-test:
-    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        swift: ["6.0.3"]
-    runs-on: ${{ matrix.os }}
+    name: Swift Test
+    runs-on: ubuntu-latest
     steps:
-      - uses: yretenai/setup-swift@edge
+      - uses: yretenai/setup-swift@unsafe
         with:
-          swift-version: ${{ matrix.swift }}
+          swift-version: 6.0.3
       - uses: actions/checkout@v4
       - name: Build
         run: swift build
