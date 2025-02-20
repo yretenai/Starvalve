@@ -10,7 +10,11 @@ let package = Package(
 	products: [
 		.library(
 			name: "Starvalve",
-			targets: ["Starvalve"])
+			type: .dynamic,
+			targets: ["Starvalve"]),
+		.executable(
+			name: "StarvalveControl",
+			targets: ["starvalvectl"])
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0")
