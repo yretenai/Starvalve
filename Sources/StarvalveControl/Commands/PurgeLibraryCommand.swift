@@ -107,7 +107,7 @@ struct PurgeLibraryCommand: ParsableCommand {
 			print("Delete \"\(path.path, color: .red)\"? [Y/n]:", terminator: " ")
 			guard let line = readLine(strippingNewline: true),
 				let firstChar = line.lowercased().first,
-				firstChar == "Y"
+				firstChar == "y"
 			else {
 				return
 			}

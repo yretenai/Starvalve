@@ -8,7 +8,7 @@ struct StarvalveControl: ParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "starvalvectl",
 		abstract: "A utility for manipulating Steam installations.",
-		subcommands: [ListAppsCommand.self, CleanAppsCommand.self, LibrariesCommand.self, StagingCommand.self],
+		subcommands: [ListAppsCommand.self, CleanAppsCommand.self, LibrariesCommand.self, StagingCommand.self, BrickDOSDevicesCommand.self],
 		defaultSubcommand: ListAppsCommand.self
 	)
 }

@@ -63,7 +63,7 @@ struct CleanAppsCommand: ParsableCommand {
 						print("Delete \"\(strayPath.path, color: .red)\"? [Y/n]:", terminator: " ")
 						guard let line = readLine(strippingNewline: true),
 							let firstChar = line.lowercased().first,
-							firstChar == "Y"
+							firstChar == "y"
 						else {
 							continue
 						}
@@ -96,7 +96,7 @@ struct CleanAppsCommand: ParsableCommand {
 					print("Delete \"\(appPath.path, color: .red)\"? [Y/n]:", terminator: " ")
 					guard let line = readLine(strippingNewline: true),
 						let firstChar = line.lowercased().first,
-						firstChar == "Y"
+						firstChar == "y"
 					else {
 						continue
 					}

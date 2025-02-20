@@ -13,8 +13,8 @@ let package = Package(
 			type: .dynamic,
 			targets: ["Starvalve"]),
 		.executable(
-			name: "StarvalveControl",
-			targets: ["starvalvectl"])
+			name: "starvalvectl",
+			targets: ["starvalvectl"]),
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0")
